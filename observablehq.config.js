@@ -19,13 +19,24 @@ export default {
   ],
 
   // Content to add to the head of the page, e.g. for a favicon:
-  head: '<link rel="icon" href="observable.png" type="image/png" sizes="32x32">',
+  head: `
+    <link rel="icon" href="observable.png" type="image/png" sizes="32x32">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+      body {
+        font-family: "JetBrains Mono", monospace !important;
+      }
+      * {
+        font-family: "JetBrains Mono", monospace !important;
+      }
+    </style>
+  `,
 
   // The path to the source root.
   root: "src",
 
   // Some additional configuration options:
-  theme: "light", // Light theme for better dashboard appearance
+  theme: ["light", "alt", "wide"], // Light theme for better dashboard appearance
   sidebar: true,  // Show the sidebar
   toc: false,     // Disable the table of contents
   pager: false,   // No need for previous & next links in the footer
