@@ -53,8 +53,7 @@ function weeklySignupsPlot(width) {
         stroke: "red",
         strokeWidth: 2,
         strokeDasharray: "4 2"
-      }),
-      Plot.ruleY([0])
+      })
     ],
     width: width || 1200,
     height: 400,
@@ -93,8 +92,7 @@ function weeklyActiveUsersPlot(width) {
             y: d => d.toLocaleString()
           }
         }
-      }),
-      Plot.ruleY([0])
+      })
     ],
     width: width || 1200,
     height: 400,
@@ -141,8 +139,7 @@ function weeklySubscriptionStartsPlot(width) {
         stroke: "darkred",
         strokeWidth: 2,
         strokeDasharray: "4 2"
-      }),
-      Plot.ruleY([0])
+      })
     ],
     width: width || 1200,
     height: 400,
@@ -180,8 +177,7 @@ function weeklyMRRMetricsPlot(width) {
         fill: "movement_type",
         r: 3,
         tip: true
-      }),
-      Plot.ruleY([0])
+      })
     ],
     width: width || 1200,
     height: 400,

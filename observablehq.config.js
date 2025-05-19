@@ -27,6 +27,6 @@ export default {
   // Some additional configuration options:
   theme: "light", // Light theme for better dashboard appearance
   sidebar: true,  // Show the sidebar
-  toc: true,      // Show the table of contents
+  toc: false,     // Disable the table of contents
   pager: false,   // No need for previous & next links in the footer
 };
