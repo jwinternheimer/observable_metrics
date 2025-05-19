@@ -1,0 +1,27 @@
+{
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "clean": "rimraf src/.observablehq/cache",
+    "build": "observable build",
+    "export-queries": "node export-queries.js",
+    "predev": "npm run export-queries",
+    "dev": "observable preview",
+    "deploy": "observable deploy",
+    "observable": "observable"
+  },
+  "dependencies": {
+    "@google-cloud/bigquery": "^7.7.1",
+    "@google-cloud/bigquery-connection": "^4.0.1",
+    "@observablehq/framework": "^1.13.3",
+    "d3-dsv": "^3.0.1",
+    "d3-time-format": "^4.1.0",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "rimraf": "^5.0.5"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
