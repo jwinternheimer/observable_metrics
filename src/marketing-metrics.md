@@ -8,8 +8,6 @@ This dashboard tracks key marketing metrics to evaluate channel and campaign per
 
 ```js
 // Load data from CSV files
-const channelPerformance = FileAttachment("data/marketing_channel_performance.csv").csv({typed: true});
-const campaignConversion = FileAttachment("data/marketing_campaign_conversion.csv").csv({typed: true});
 const signupsBySource = FileAttachment("data/signups_by_source.csv").csv({typed: true});
 ```
 
