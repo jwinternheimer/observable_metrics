@@ -2,9 +2,9 @@
 title: Home
 ---
 
-# Buffer Transparent Metrics
+# Buffer Transparent Data
 
-Welcome to the Buffer Metrics Dashboard. This site includes transparent dashboards displaying key business metrics for Buffer.
+Welcome to the Buffer Metrics Dashboard. This site includes transparent dashboards displaying key metrics for Buffer.
 
 <div class="dashboard-links">
   <div class="dashboard-card">
@@ -17,6 +17,12 @@ Welcome to the Buffer Metrics Dashboard. This site includes transparent dashboar
     <h3>Marketing Metrics</h3>
     <p>Marketing metrics including signups by attribution channel and blog visits.</p>
     <a href="/marketing-metrics" class="dashboard-button">View Dashboard</a>
+  </div>
+  
+  <div class="dashboard-card">
+    <h3>Monthly Marketing Report</h3>
+    <p>Monthly summary of key marketing metrics including signups and first-time sessions.</p>
+    <a href="/monthly-marketing-report" class="dashboard-button">View Dashboard</a>
   </div>
 </div>
 
