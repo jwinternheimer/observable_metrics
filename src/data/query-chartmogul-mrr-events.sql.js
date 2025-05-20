@@ -1,3 +1,4 @@
+export default `
 select
     date_trunc(date, week) as week
     , movement_type
@@ -9,3 +10,4 @@ where date(timestamp_trunc(date, week)) between
         and movement_type in ('new_biz','churn','contraction','expansion','reactivation')
 group by 1,2
 order by 1 asc
+`; 

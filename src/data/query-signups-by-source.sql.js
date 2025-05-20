@@ -1,3 +1,4 @@
+export default `
 select
     date_trunc(date(s.started_at), week) as week
     , s.referrer_domain_grouped as referrer
@@ -9,3 +10,4 @@ where s.signup_session
         date_sub(current_date, interval 1 week)
 group by 1,2
 order by 1 asc
+`; 
