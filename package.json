@@ -4,7 +4,7 @@
   "scripts": {
     "clean": "rimraf src/.observablehq/cache",
     "build": "observable build",
-    "export-queries": "node export-queries.js",
+    "export-queries": "node src/data/export-queries.js",
     "predev": "npm run export-queries",
     "dev": "observable preview",
     "deploy": "observable deploy",

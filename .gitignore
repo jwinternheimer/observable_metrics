@@ -1,7 +1,15 @@
 .DS_Store
 /dist/
-node_modules/
+/node_modules/
 yarn-error.log
+npm-debug.log
 
-# env
-.env    
+# env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Observable cache
+src/.observablehq/cache
