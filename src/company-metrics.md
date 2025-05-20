@@ -2,9 +2,9 @@
 title: Company Metrics - Buffer Transparent Metrics
 ---
 
-# Company Key Performance Indicators
+# Key Business Metrics
 
-This dashboard provides high-level company metrics to track business performance.
+This dashboard shows high-level business metrics tracked at Buffer.
 
 ```js
 // Load data from CSV files
