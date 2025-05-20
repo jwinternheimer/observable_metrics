@@ -1,7 +1,7 @@
 // See https://observablehq.com/framework/config for documentation.
 export default {
   // The app's title; used in the sidebar and webpage titles.
-  title: "Observable Metrics",
+  title: "Buffer Metrics",
 
   // The pages and sections in the sidebar.
   pages: [

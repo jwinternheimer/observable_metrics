@@ -6,23 +6,21 @@ title: Home
 
 Welcome to the Buffer Metrics Dashboard. This site includes transparent dashboards displaying key business metrics for Buffer.
 
-## Available Dashboards
-
 <div class="dashboard-links">
   <div class="dashboard-card">
     <h3>Company Metrics</h3>
-    <p>High-level business performance metrics including weekly signups, monthly active users, and growth rates.</p>
+    <p>High-level metrics including signups, weekly active users, and new customers.</p>
     <a href="/company-metrics" class="dashboard-button">View Dashboard</a>
   </div>
   
   <div class="dashboard-card">
     <h3>Marketing Metrics</h3>
-    <p>Marketing performance metrics including channel performance, campaign conversion rates, and ROI analysis.</p>
+    <p>Marketing metrics including signups by attribution channel and blog visits.</p>
     <a href="/marketing-metrics" class="dashboard-button">View Dashboard</a>
   </div>
 </div>
 
-## Data Refresh
+### Data Freshness
 
 The dashboards are powered by data from BigQuery. The data is refreshed once per day and stored as CSV files for efficient access.
 
