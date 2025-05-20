@@ -2,6 +2,8 @@
 title: Monthly Marketing Report - Buffer Transparent Metrics
 ---
 
+# Monthly Marketing Metrics
+
 ```js
 // Load data
 const monthlySignupsData = FileAttachment("data/company_monthly_signups.csv").csv({typed: true});
