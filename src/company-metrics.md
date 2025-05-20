@@ -45,14 +45,6 @@ function weeklySignupsPlot(width) {
         fill: "steelblue",
         r: 3,
         tip: true
-      }),
-      // Linear regression trend line
-      Plot.linearRegressionY(weeklySignups, {
-        x: "week", 
-        y: "signups",
-        stroke: "red",
-        strokeWidth: 2,
-        strokeDasharray: "4 2"
       })
     ],
     width: width || 1200,
@@ -131,14 +123,6 @@ function weeklySubscriptionStartsPlot(width) {
         fill: "orangered",
         r: 3,
         tip: true
-      }),
-      // Linear regression trend line
-      Plot.linearRegressionY(weeklySubscriptions, {
-        x: "week", 
-        y: "new_customers",
-        stroke: "darkred",
-        strokeWidth: 2,
-        strokeDasharray: "4 2"
       })
     ],
     width: width || 1200,
