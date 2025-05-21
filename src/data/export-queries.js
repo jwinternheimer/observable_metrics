@@ -9,6 +9,7 @@ import signupsBySourceSql from "./query-signups-by-source.sql.js";
 import chartmogulMrrEventsSql from "./query-chartmogul-mrr-events.sql.js";
 import monthlySignupsSql from "./query-monthly-signups.sql.js";
 import monthlyFtsSql from "./query-monthly-fts.sql.js";
+import bufferTeamPostsSql from "./query-buffer-team-posts.sql.js";
 
 // Ensure target directory exists
 const targetDir = "./src/data";
@@ -223,6 +224,30 @@ async function executeQueries() {
     const csvMonthlyFts = csvFormat(formattedMonthlyFtsRows);
     fs.writeFileSync(`${targetDir}/company_monthly_fts.csv`, csvMonthlyFts);
     console.log(`Monthly first-time sessions query complete, saved ${monthlyFtsRows.length} rows`);
+    
+    // Query 8: Buffer Team Posts
+    console.log("Running buffer team posts query...");
+    const bufferTeamPostsRows = await runQuery(bufferTeamPostsSql);
+    
+    // Format dates properly
+    const formattedBufferTeamPostsRows = bufferTeamPostsRows.map(row => {
+      if (row.week instanceof Date) {
+        return {
+          ...row,
+          week: row.week.toISOString().split('T')[0] // Convert to YYYY-MM-DD
+        };
+      } else if (typeof row.week === 'object') {
+        return {
+          ...row,
+          week: String(row.week.value || JSON.stringify(row.week))
+        };
+      }
+      return row;
+    });
+    
+    const csvBufferTeamPosts = csvFormat(formattedBufferTeamPostsRows);
+    fs.writeFileSync(`${targetDir}/buffer_team_posts.csv`, csvBufferTeamPosts);
+    console.log(`Buffer team posts query complete, saved ${bufferTeamPostsRows.length} rows`);
     
     // Update the lock file
     updateLockFile();
