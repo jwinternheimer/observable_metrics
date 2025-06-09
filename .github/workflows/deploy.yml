@@ -25,11 +25,11 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Set up Google Cloud credentials
+        run: echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}' > google-credentials.json
       - name: Run data queries
         env:
-          BQ_PROJECT_ID: ${{ secrets.BQ_PROJECT_ID }}
-          BQ_CLIENT_EMAIL: ${{ secrets.BQ_CLIENT_EMAIL }}
-          BQ_PRIVATE_KEY: ${{ secrets.BQ_PRIVATE_KEY }}
+          GOOGLE_APPLICATION_CREDENTIALS: ./google-credentials.json
         run: npm run export-queries
       - run: npm run build
       - uses: actions/configure-pages@v4
