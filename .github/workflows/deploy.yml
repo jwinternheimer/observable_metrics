@@ -3,9 +3,9 @@ name: Deploy
 on:
   # Run this workflow whenever a new commit is pushed to main.
   push: {branches: [main]}
-  # Run this workflow once per day, at 10:15 UTC
-  schedule: [{cron: "15 10 * * *"}]
-  # Run this workflow when triggered manually in GitHub’s UI.
+  # Run this workflow once per week, every Monday at 10:15 UTC
+  schedule: [{cron: "15 10 * * 1"}]
+  # Run this workflow when triggered manually in GitHub's UI.
   workflow_dispatch: {}
 
 jobs:
@@ -25,6 +25,16 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Set up Google Cloud credentials
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+        run: |
+          echo "$GOOGLE_APPLICATION_CREDENTIALS_JSON" > google-credentials.json
+          export GOOGLE_APPLICATION_CREDENTIALS=./google-credentials.json
+      - name: Run data queries
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ./google-credentials.json
+        run: npm run export-queries
       - run: npm run build
       - uses: actions/configure-pages@v4
       - uses: actions/upload-pages-artifact@v3
