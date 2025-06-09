@@ -3,7 +3,6 @@
   "private": true,
   "scripts": {
     "clean": "rimraf src/.observablehq/cache",
-    "prebuild": "npm run export-queries",
     "build": "observable build",
     "export-queries": "node src/data/export-queries.js",
     "predev": "npm run export-queries",
