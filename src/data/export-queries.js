@@ -22,6 +22,11 @@ const LOCK_FILE_PATH = path.join(targetDir, "last_query_timestamp.json");
 
 // Check if we should run queries based on the lock file
 function shouldRunQueries() {
+  // In CI environment, always run queries to ensure fresh data
+  if (process.env.CI) {
+    return true;
+  }
+
   try {
     if (!fs.existsSync(LOCK_FILE_PATH)) {
       return true; // No lock file exists, so run queries
@@ -31,8 +36,9 @@ function shouldRunQueries() {
     const lastRunTimestamp = new Date(lockFileContent.lastRun);
     const currentDate = new Date();
     
-    // Check if the last run was on a different day
-    return lastRunTimestamp.toDateString() !== currentDate.toDateString();
+    // Check if the last run was more than 6 days ago (allowing for weekly updates)
+    const daysSinceLastRun = Math.floor((currentDate - lastRunTimestamp) / (1000 * 60 * 60 * 24));
+    return daysSinceLastRun >= 6;
   } catch (error) {
     console.error("Error checking query lock file:", error);
     return true; // Run queries on error to be safe
@@ -48,13 +54,14 @@ function updateLockFile() {
 }
 
 async function executeQueries() {
-  // Check if we should run queries today
+  // Check if we should run queries
   if (!shouldRunQueries()) {
-    console.log("Queries already run today. Skipping execution.");
+    console.log("Queries already run recently. Skipping execution.");
     return;
   }
 
-  console.log("Starting query execution...");
+  const environment = process.env.CI ? "CI" : "local";
+  console.log(`Starting query execution in ${environment} environment...`);
 
   try {
     // Query 1: Weekly Signups
