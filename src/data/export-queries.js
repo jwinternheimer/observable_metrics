@@ -37,9 +37,9 @@ function shouldRunQueries() {
     const lastRunTimestamp = new Date(lockFileContent.lastRun);
     const currentDate = new Date();
     
-    // Check if the last run was more than 6 days ago (allowing for weekly updates)
+    // Check if the last run was more than 1 day ago (allowing for daily updates)
     const daysSinceLastRun = Math.floor((currentDate - lastRunTimestamp) / (1000 * 60 * 60 * 24));
-    return daysSinceLastRun >= 6;
+    return daysSinceLastRun >= 1;
   } catch (error) {
     console.error("Error checking query lock file:", error);
     return true; // Run queries on error to be safe
