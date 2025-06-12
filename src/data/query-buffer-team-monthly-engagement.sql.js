@@ -22,9 +22,9 @@ select
     , ifnull(sum(up.likes), 0) as likes
     , safe_add(ifnull(sum(up.reposts), 0), ifnull(sum(up.retweets), 0)) as reposts
     , safe_add(ifnull(sum(up.replies), 0), ifnull(sum(up.comments), 0)) as comments_and_replies
-    , ifnull(sum(up.reach), 0) as reach
-    , ifnull(sum(up.impressions), 0) as impressions
-    , ifnull(sum(up.views), 0) as views
+    , sum(ifnull(up.reach, 0)) as reach
+    , sum(ifnull(up.impressions, 0)) as impressions
+    , sum(ifnull(up.views, 0)) as views
 from admins as a
 inner join dbt_buffer.publish_updates as up
     on a.account_id = up.account_id

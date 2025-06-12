@@ -360,12 +360,13 @@ display(bufferTeamEngagementTable());
 .engagement-table {
   margin: 1rem 0;
   border-radius: 8px;
-  overflow: hidden;
+  overflow-x: auto;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .engagement-table table {
   width: 100%;
+  min-width: 1075px;
   border-collapse: collapse;
   background-color: white;
   margin: 0;
@@ -388,9 +389,16 @@ display(bufferTeamEngagementTable());
 
 .engagement-table th,
 .engagement-table td {
-  padding: 12px 16px;
+  padding: 12px 8px;
   border-bottom: 1px solid #ddd;
   vertical-align: middle;
+  box-sizing: border-box;
+}
+
+.engagement-table .metric-header,
+.engagement-table .metric-cell {
+  padding-left: 8px !important;
+  padding-right: 8px !important;
 }
 
 .engagement-table thead {
@@ -424,14 +432,16 @@ display(bufferTeamEngagementTable());
 
 .team-member-header {
   text-align: left;
-  width: 250px;
-  min-width: 250px;
+  width: 200px !important;
+  min-width: 200px !important;
+  max-width: 200px !important;
 }
 
 .metric-header {
   text-align: right;
-  width: 100px;
-  min-width: 100px;
+  width: 125px !important;
+  min-width: 125px !important;
+  max-width: 125px !important;
 }
 
 .engagement-table tbody tr:hover {
@@ -443,15 +453,18 @@ display(bufferTeamEngagementTable());
   align-items: center;
   gap: 10px;
   text-align: left;
-  width: 250px;
-  min-width: 250px;
+  width: 200px !important;
+  min-width: 200px !important;
+  max-width: 200px !important;
 }
 
 .metric-cell {
   text-align: right;
   font-variant-numeric: tabular-nums;
-  width: 100px;
-  min-width: 100px;
+  width: 125px !important;
+  min-width: 125px !important;
+  max-width: 125px !important;
+  white-space: nowrap;
 }
 
 .totals-row {
