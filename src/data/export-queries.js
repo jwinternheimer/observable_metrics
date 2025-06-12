@@ -10,6 +10,7 @@ import chartmogulMrrEventsSql from "./query-chartmogul-mrr-events.sql.js";
 import monthlySignupsSql from "./query-monthly-signups.sql.js";
 import monthlyFtsSql from "./query-monthly-fts.sql.js";
 import bufferTeamPostsSql from "./query-buffer-team-posts.sql.js";
+import bufferTeamMonthlyEngagementSql from "./query-buffer-team-monthly-engagement.sql.js";
 
 // Ensure target directory exists
 const targetDir = "./src/data";
@@ -255,6 +256,14 @@ async function executeQueries() {
     const csvBufferTeamPosts = csvFormat(formattedBufferTeamPostsRows);
     fs.writeFileSync(`${targetDir}/buffer_team_posts.csv`, csvBufferTeamPosts);
     console.log(`Buffer team posts query complete, saved ${bufferTeamPostsRows.length} rows`);
+    
+    // Query 9: Buffer Team Monthly Engagement
+    console.log("Running buffer team monthly engagement query...");
+    const bufferTeamMonthlyEngagementRows = await runQuery(bufferTeamMonthlyEngagementSql);
+    
+    const csvBufferTeamMonthlyEngagement = csvFormat(bufferTeamMonthlyEngagementRows);
+    fs.writeFileSync(`${targetDir}/buffer_team_monthly_engagement.csv`, csvBufferTeamMonthlyEngagement);
+    console.log(`Buffer team monthly engagement query complete, saved ${bufferTeamMonthlyEngagementRows.length} rows`);
     
     // Update the lock file
     updateLockFile();
