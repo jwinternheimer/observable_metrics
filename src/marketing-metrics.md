@@ -203,7 +203,9 @@ function bufferTeamEngagementTable() {
     comments_and_replies: acc.comments_and_replies + (d.comments_and_replies || 0),
     reach: acc.reach + (d.reach || 0),
     impressions: acc.impressions + (d.impressions || 0),
-    views: acc.views + (d.views || 0)
+    views: acc.views + (d.views || 0),
+    current_streak_sum: acc.current_streak_sum + (d.current_streak || 0),
+    count: acc.count + 1
   }), {
     posts: 0,
     likes: 0,
@@ -211,8 +213,13 @@ function bufferTeamEngagementTable() {
     comments_and_replies: 0,
     reach: 0,
     impressions: 0,
-    views: 0
+    views: 0,
+    current_streak_sum: 0,
+    count: 0
   });
+  
+  // Calculate average streak for totals row
+  totals.current_streak_avg = totals.count > 0 ? Math.round(totals.current_streak_sum / totals.count) : 0;
 
   // Sort function
   function sortData(data, column, direction) {
@@ -255,6 +262,9 @@ function bufferTeamEngagementTable() {
             <th class="team-member-header sortable" data-column="name">
               Team Member ${getSortIcon('name')}
             </th>
+            <th class="metric-header sortable" data-column="current_streak">
+              Current Streak ${getSortIcon('current_streak')}
+            </th>
             <th class="metric-header sortable" data-column="posts">
               Posts ${getSortIcon('posts')}
             </th>
@@ -285,6 +295,7 @@ function bufferTeamEngagementTable() {
                 ${d.avatar ? html`<img src="${d.avatar}" alt="${d.name}" class="avatar">` : html`<div class="avatar-placeholder">${d.name ? d.name.charAt(0).toUpperCase() : '?'}</div>`}
                 <span class="name">${d.name}</span>
               </td>
+              <td class="metric-cell">${d.current_streak.toLocaleString()}</td>
               <td class="metric-cell">${d.posts.toLocaleString()}</td>
               <td class="metric-cell">${d.likes.toLocaleString()}</td>
               <td class="metric-cell">${d.reposts.toLocaleString()}</td>
@@ -298,6 +309,7 @@ function bufferTeamEngagementTable() {
         <tfoot>
           <tr class="totals-row">
             <td class="team-member"><strong>TOTALS</strong></td>
+            <td class="metric-cell"><strong>${totals.current_streak_avg} (avg)</strong></td>
             <td class="metric-cell"><strong>${totals.posts.toLocaleString()}</strong></td>
             <td class="metric-cell"><strong>${totals.likes.toLocaleString()}</strong></td>
             <td class="metric-cell"><strong>${totals.reposts.toLocaleString()}</strong></td>
