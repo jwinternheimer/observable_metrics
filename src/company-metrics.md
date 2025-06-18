@@ -7,6 +7,9 @@ title: Company Metrics - Buffer Transparent Metrics
 This dashboard shows high-level business metrics tracked at Buffer.
 
 ```js
+// Import the xmr component
+import {xmrChart} from "./components/xmr.js";
+
 // Load data from CSV files
 const weeklySignups = FileAttachment("data/company_weekly_signups.csv").csv({typed: true});
 const weeklySubscriptions = FileAttachment("data/company_weekly_subscriptions.csv").csv({typed: true});
@@ -16,41 +19,17 @@ const chartmogulMrrEvents = FileAttachment("data/chartmogul_mrr_events.csv").csv
 
 ```js
 function weeklySignupsPlot(width) {
-  return Plot.plot({
+  return xmrChart({
+    metrics: weeklySignups,
     title: "Weekly Signups (Last 52 Weeks)",
-    y: {
-      grid: true,
-      label: "New Signups"
-    },
-    x: {
-      label: "Week",
-      tickRotate: 45
-    },
-    color: {
-      scheme: "blues"
-    },
-    marks: [
-      // Line for actual data 
-      Plot.line(weeklySignups, {
-        x: "week",
-        y: "signups",
-        stroke: "steelblue",
-        strokeWidth: 2,
-        curve: "natural"
-      }),
-      // Data points
-      Plot.dot(weeklySignups, {
-        x: "week",
-        y: "signups", 
-        fill: "steelblue",
-        r: 3,
-        tip: true
-      })
-    ],
-    width: width || 1200,
-    height: 400,
-    marginBottom: 70,
-    marginLeft: 60
+    subtitle: "XmR Control Chart with Trend Analysis",
+    yField: "signups",
+    yLabel: "New Signups",
+    dateField: "week",
+    showMovingRange: false,
+    showTrend: true,
+    showSeasonality: true,
+    seasonalPeriod: 5 // 13 weeks for quarterly seasonality
   });
 }
 
@@ -170,12 +149,48 @@ function weeklyMRRMetricsPlot(width) {
   });
 }
 
-// Display all plots in a two-column grid
+// XmR Chart Legend
+const xmrLegend = html`
+  <div style="
+    margin: 10px 0 20px 0;
+    padding: 12px 16px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    border-left: 4px solid #007bff;
+    font-size: 13px;
+    line-height: 1.5;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  ">
+    <div style="margin-bottom: 8px;"><strong>Weekly Signups Chart Guide:</strong></div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+      <span><span style="color: steelblue; font-weight: bold; font-size: 16px;">●</span> Normal week (expected variation)</span>
+      <span><span style="color: #dc3545; font-weight: bold; font-size: 16px;">●</span> Exceptional week (much higher/lower than expected)</span>
+      <span><span style="color: #fd7e14; font-weight: bold; font-size: 16px;">●</span> Potential pattern change (early warning)</span>
+      <span><span style="color: #ffc107; font-weight: bold; font-size: 16px;">●</span> Sustained shift (process has changed)</span>
+    </div>
+  </div>
+`;
+
+// Display all plots with custom layout
 display(html`
-  <div class="grid grid-cols-2">
-    <div class="card">${resize(width => weeklySignupsPlot(width))}</div>
-    <div class="card">${resize(width => weeklyActiveUsersPlot(width))}</div>
-    <div class="card">${resize(width => weeklySubscriptionStartsPlot(width))}</div>
-    <div class="card">${resize(width => weeklyMRRMetricsPlot(width))}</div>
+  <div>
+    ${xmrLegend}
+    
+    <!-- Full-width Weekly Signups Chart -->
+    <div class="card" style="margin-bottom: 1rem;">
+      ${resize(width => weeklySignupsPlot(width))}
+    </div>
+    
+    <!-- Full-width Weekly Active Users Chart -->
+    <div class="card" style="margin-bottom: 1rem;">
+      ${resize(width => weeklyActiveUsersPlot(width))}
+    </div>
+    
+    <!-- Two-column grid for remaining charts -->
+    <div class="grid grid-cols-2">
+      <div class="card">${resize(width => weeklySubscriptionStartsPlot(width))}</div>
+      <div class="card">${resize(width => weeklyMRRMetricsPlot(width))}</div>
+    </div>
   </div>
 `);
