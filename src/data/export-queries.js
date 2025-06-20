@@ -11,6 +11,7 @@ import monthlySignupsSql from "./query-monthly-signups.sql.js";
 import monthlyFtsSql from "./query-monthly-fts.sql.js";
 import bufferTeamPostsSql from "./query-buffer-team-posts.sql.js";
 import bufferTeamMonthlyEngagementSql from "./query-buffer-team-monthly-engagement.sql.js";
+import monthlyBlogPageviewsSql from "./query-monthly-blog-pageviews.sql.js";
 
 // Ensure target directory exists
 const targetDir = "./src/data";
@@ -264,6 +265,30 @@ async function executeQueries() {
     const csvBufferTeamMonthlyEngagement = csvFormat(bufferTeamMonthlyEngagementRows);
     fs.writeFileSync(`${targetDir}/buffer_team_monthly_engagement.csv`, csvBufferTeamMonthlyEngagement);
     console.log(`Buffer team monthly engagement query complete, saved ${bufferTeamMonthlyEngagementRows.length} rows`);
+    
+    // Query 10: Monthly Blog Pageviews
+    console.log("Running monthly blog pageviews query...");
+    const monthlyBlogPageviewsRows = await runQuery(monthlyBlogPageviewsSql);
+    
+    // Format dates properly
+    const formattedMonthlyBlogPageviewsRows = monthlyBlogPageviewsRows.map(row => {
+      if (row.month instanceof Date) {
+        return {
+          ...row,
+          month: row.month.toISOString().split('T')[0] // Convert to YYYY-MM-DD
+        };
+      } else if (typeof row.month === 'object') {
+        return {
+          ...row,
+          month: String(row.month.value || JSON.stringify(row.month))
+        };
+      }
+      return row;
+    });
+    
+    const csvMonthlyBlogPageviews = csvFormat(formattedMonthlyBlogPageviewsRows);
+    fs.writeFileSync(`${targetDir}/company_monthly_blog_pageviews.csv`, csvMonthlyBlogPageviews);
+    console.log(`Monthly blog pageviews query complete, saved ${monthlyBlogPageviewsRows.length} rows`);
     
     // Update the lock file
     updateLockFile();
