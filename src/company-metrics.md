@@ -7,6 +7,22 @@ title: Company Metrics - Buffer Transparent Metrics
 This dashboard shows high-level business metrics tracked at Buffer.
 
 ```js
+const lastQueryTimestamp = await FileAttachment("data/last_query_timestamp.json").json();
+const lastRunDate = new Date(lastQueryTimestamp.lastRun).toLocaleString('en-US', { 
+  year: 'numeric', 
+  month: 'long', 
+  day: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+  timeZoneName: 'short'
+});
+```
+
+<div style="margin: 20px 0; padding: 12px; background-color: #f8f9fa; border-left: 4px solid #007bff; font-size: 14px; color: #666;">
+  <strong>Data current as of:</strong> ${lastRunDate}
+</div>
+
+```js
 // Import the xmr component
 import {xmrChart} from "./components/xmr.js";
 

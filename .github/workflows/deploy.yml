@@ -3,8 +3,8 @@ name: Deploy
 on:
   # Run this workflow whenever a new commit is pushed to main.
   push: {branches: [main]}
-  # Run this workflow once per week, every Monday at 10:15 UTC
-  schedule: [{cron: "15 10 * * 1"}]
+  # Run this workflow daily at 12:00 UTC (8am EDT / 9am EST)
+  schedule: [{cron: "0 12 * * *"}]
   # Run this workflow when triggered manually in GitHub's UI.
   workflow_dispatch: {}
 

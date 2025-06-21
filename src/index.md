@@ -14,7 +14,7 @@ Welcome to the Buffer Metrics Dashboard. This site includes transparent dashboar
   </div>
   
   <div class="dashboard-card">
-    <h3>Marketing Metrics</h3>
+    <h3>Team of Creators Dashboard</h3>
     <p>Marketing metrics including signups by attribution channel and blog visits.</p>
     <a href="/marketing-metrics" class="dashboard-button">View Dashboard</a>
   </div>
