@@ -50,80 +50,32 @@ function weeklySignupsPlot(width) {
 }
 
 function weeklyActiveUsersPlot(width) {
-  return Plot.plot({
+  return xmrChart({
+    metrics: weeklyActiveUsers,
     title: "Weekly Active Users (Last 52 Weeks)",
-    y: {
-      grid: true,
-      label: "Active Users"
-    },
-    x: {
-      label: "Week",
-      tickRotate: 45
-    },
-    marks: [
-      Plot.line(weeklyActiveUsers, {
-        x: "week",
-        y: "weekly_active_users",
-        stroke: "purple",
-        strokeWidth: 3,
-        curve: "natural"
-      }),
-      Plot.dot(weeklyActiveUsers, {
-        x: "week",
-        y: "weekly_active_users",
-        fill: "purple",
-        r: 3,
-        tip: {
-          format: {
-            x: d => new Date(d).toLocaleDateString(),
-            y: d => d.toLocaleString()
-          }
-        }
-      })
-    ],
-    width: width || 1200,
-    height: 400,
-    marginBottom: 70,
-    marginLeft: 60
+    subtitle: "XmR Control Chart with Trend Analysis",
+    yField: "weekly_active_users",
+    yLabel: "Active Users",
+    dateField: "week",
+    showMovingRange: false,
+    showTrend: true,
+    showSeasonality: true,
+    seasonalPeriod: 5 // 13 weeks for quarterly seasonality
   });
 }
 
 function weeklySubscriptionStartsPlot(width) {
-  return Plot.plot({
+  return xmrChart({
+    metrics: weeklySubscriptions,
     title: "Weekly New Subscriptions (Last 52 Weeks)",
-    y: {
-      grid: true,
-      label: "New Customers"
-    },
-    x: {
-      label: "Week",
-      tickRotate: 45
-    },
-    color: {
-      scheme: "reds"
-    },
-    marks: [
-      // Line for actual data 
-      Plot.line(weeklySubscriptions, {
-        x: "week",
-        y: "new_customers",
-        stroke: "orangered",
-        strokeWidth: 2,
-        curve: "natural"
-      }),
-      // Data points
-      Plot.dot(weeklySubscriptions, {
-        x: "week",
-        y: "new_customers", 
-        fill: "orangered",
-        r: 3,
-        tip: true
-      })
-    ],
-    width: width || 1200,
-    height: 400,
-    marginBottom: 70,
-    marginLeft: 60
+    subtitle: "XmR Control Chart with Trend Analysis",
+    yField: "new_customers",
+    yLabel: "New Customers",
+    dateField: "week",
+    showMovingRange: false,
+    showTrend: true,
+    showSeasonality: true,
+    seasonalPeriod: 5 // 13 weeks for quarterly seasonality
   });
 }
 
