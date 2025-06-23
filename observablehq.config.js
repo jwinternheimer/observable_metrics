@@ -13,7 +13,7 @@ export default {
       name: "Dashboards",
       pages: [
         {name: "Company Metrics", path: "/company-metrics"},
-        {name: "Marketing Metrics", path: "/marketing-metrics"},
+        {name: "Team of Creators", path: "/marketing-metrics"},
         {name: "Monthly Marketing Report", path: "/monthly-marketing-report"}
       ]
     }
