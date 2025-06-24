@@ -59,23 +59,23 @@ function weeklyBufferPostsPlot(width) {
   });
 }
 
-// Create a function for the Buffer team engagement plot
-function weeklyBufferEngagementPlot(width) {
+// Create a function for the Buffer team reach plot
+function weeklyBufferReachPlot(width) {
   return Plot.plot({
-    title: "Weekly Buffer Team Post Engagements (Last 52 Weeks)",
-    y: { grid: true, label: "Total Engagements" },
+    title: "Weekly Buffer Team Reach (Last 52 Weeks)",
+    y: { grid: true, label: "Total Reach" },
     x: { label: "Week", tickRotate: 45 },
     marks: [
       Plot.line(bufferTeamPosts, {
         x: "week",
-        y: "total_engagement",
+        y: "total_reach",
         stroke: "#D7301F",
         strokeWidth: 2,
         curve: "natural"
       }),
       Plot.dot(bufferTeamPosts, {
         x: "week",
-        y: "total_engagement",
+        y: "total_reach",
         fill: "#D7301F",
         r: 3,
         tip: true
@@ -95,7 +95,7 @@ function weeklyBufferEngagementPlot(width) {
 display(html`
   <div class="grid grid-cols-2">
     <div class="card">${resize(width => weeklyBufferPostsPlot(width))}</div>
-    <div class="card">${resize(width => weeklyBufferEngagementPlot(width))}</div>
+    <div class="card">${resize(width => weeklyBufferReachPlot(width))}</div>
   </div>
 `);
 ```
