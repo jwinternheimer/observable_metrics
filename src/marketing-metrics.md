@@ -4,8 +4,6 @@ title: Team of Creators Dashboard - Buffer Transparent Metrics
 
 # Team of Creators Dashboard
 
-This dashboard tracks key marketing metrics to evaluate channel and campaign performance.
-
 ```js
 const lastQueryTimestamp = await FileAttachment("data/last_query_timestamp.json").json();
 const lastRunDate = new Date(lastQueryTimestamp.lastRun).toLocaleString('en-US', { 
@@ -26,13 +24,45 @@ const lastRunDate = new Date(lastQueryTimestamp.lastRun).toLocaleString('en-US',
 // Load data from CSV files
 const bufferTeamPosts = FileAttachment("data/buffer_team_posts.csv").csv({typed: true});
 const bufferTeamMonthlyEngagement = FileAttachment("data/buffer_team_monthly_engagement.csv").csv({typed: true});
+const bufferTeamWeeklyActiveMembers = FileAttachment("data/buffer_team_weekly_active_members.csv").csv({typed: true});
+const bufferTeamWeeklyMedianPosts = FileAttachment("data/buffer_team_weekly_median_posts.csv").csv({typed: true});
 ```
 
 ```js
-// Create a function for the Buffer team posts plot
-function weeklyBufferPostsPlot(width) {
+// Create a function for the weekly active team members plot
+function activeTeamMembersPlot(width) {
   return Plot.plot({
-    title: "Weekly Buffer Team Posts (Last 52 Weeks)",
+    title: "Active Team Members",
+    y: { grid: true, label: "Number of Active Members" },
+    x: { label: "Week", tickRotate: 45 },
+    marks: [
+      Plot.line(bufferTeamWeeklyActiveMembers, {
+        x: "week",
+        y: "active_team_members",
+        stroke: "#2ECC71",
+        strokeWidth: 2,
+        curve: "natural"
+      }),
+      Plot.dot(bufferTeamWeeklyActiveMembers, {
+        x: "week",
+        y: "active_team_members",
+        fill: "#2ECC71",
+        r: 3,
+        tip: true
+      }),
+      Plot.ruleY([0])
+    ],
+    width: width || 900,
+    height: 400,
+    marginBottom: 70,
+    marginLeft: 60
+  });
+}
+
+// Create a function for the Buffer team posts plot
+function totalTeamPostsPlot(width) {
+  return Plot.plot({
+    title: "Total Team Posts",
     y: { grid: true, label: "Number of Posts" },
     x: { label: "Week", tickRotate: 45 },
     marks: [
@@ -59,10 +89,40 @@ function weeklyBufferPostsPlot(width) {
   });
 }
 
-// Create a function for the Buffer team reach plot
-function weeklyBufferReachPlot(width) {
+// Create a function for the median posts per team member plot
+function medianPostsPerMemberPlot(width) {
   return Plot.plot({
-    title: "Weekly Buffer Team Reach (Last 52 Weeks)",
+    title: "Median Posts Per Team Member",
+    y: { grid: true, label: "Median Posts per Member" },
+    x: { label: "Week", tickRotate: 45 },
+    marks: [
+      Plot.line(bufferTeamWeeklyMedianPosts, {
+        x: "week",
+        y: "median_posts_per_member",
+        stroke: "#9B59B6",
+        strokeWidth: 2,
+        curve: "natural"
+      }),
+      Plot.dot(bufferTeamWeeklyMedianPosts, {
+        x: "week",
+        y: "median_posts_per_member",
+        fill: "#9B59B6",
+        r: 3,
+        tip: true
+      }),
+      Plot.ruleY([0])
+    ],
+    width: width || 900,
+    height: 400,
+    marginBottom: 70,
+    marginLeft: 60
+  });
+}
+
+// Create a function for the Buffer team reach plot
+function totalTeamReachPlot(width) {
+  return Plot.plot({
+    title: "Total Team Reach",
     y: { grid: true, label: "Total Reach" },
     x: { label: "Week", tickRotate: 45 },
     marks: [
@@ -94,8 +154,10 @@ function weeklyBufferReachPlot(width) {
 // Display all plots in a two-column grid
 display(html`
   <div class="grid grid-cols-2">
-    <div class="card">${resize(width => weeklyBufferPostsPlot(width))}</div>
-    <div class="card">${resize(width => weeklyBufferReachPlot(width))}</div>
+    <div class="card">${resize(width => activeTeamMembersPlot(width))}</div>
+    <div class="card">${resize(width => totalTeamPostsPlot(width))}</div>
+    <div class="card">${resize(width => medianPostsPerMemberPlot(width))}</div>
+    <div class="card">${resize(width => totalTeamReachPlot(width))}</div>
   </div>
 `);
 ```
