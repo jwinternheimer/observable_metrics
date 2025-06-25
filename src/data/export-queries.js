@@ -9,7 +9,7 @@ import signupsBySourceSql from "./query-signups-by-source.sql.js";
 import chartmogulMrrEventsSql from "./query-chartmogul-mrr-events.sql.js";
 import monthlySignupsSql from "./query-monthly-signups.sql.js";
 import monthlyFtsSql from "./query-monthly-fts.sql.js";
-import bufferTeamPostsSql from "./query-buffer-team-posts.sql.js";
+import bufferTeamConsolidatedSql from "./query-buffer-team-consolidated.sql.js";
 import bufferTeamMonthlyEngagementSql from "./query-buffer-team-monthly-engagement.sql.js";
 import monthlyBlogPageviewsSql from "./query-monthly-blog-pageviews.sql.js";
 
@@ -234,12 +234,12 @@ async function executeQueries() {
     fs.writeFileSync(`${targetDir}/company_monthly_fts.csv`, csvMonthlyFts);
     console.log(`Monthly first-time sessions query complete, saved ${monthlyFtsRows.length} rows`);
     
-    // Query 8: Buffer Team Posts
-    console.log("Running buffer team posts query...");
-    const bufferTeamPostsRows = await runQuery(bufferTeamPostsSql);
+    // Query 8: Buffer Team Consolidated (replaces 3 separate queries)
+    console.log("Running consolidated buffer team query...");
+    const bufferTeamConsolidatedRows = await runQuery(bufferTeamConsolidatedSql);
     
     // Format dates properly
-    const formattedBufferTeamPostsRows = bufferTeamPostsRows.map(row => {
+    const formattedBufferTeamConsolidatedRows = bufferTeamConsolidatedRows.map(row => {
       if (row.week instanceof Date) {
         return {
           ...row,
@@ -254,9 +254,33 @@ async function executeQueries() {
       return row;
     });
     
-    const csvBufferTeamPosts = csvFormat(formattedBufferTeamPostsRows);
+    // Generate buffer_team_posts.csv (original metrics)
+    const bufferTeamPostsRows = formattedBufferTeamConsolidatedRows.map(row => ({
+      week: row.week,
+      posts: row.posts,
+      total_engagement: row.total_engagement,
+      total_reach: row.total_reach
+    }));
+    const csvBufferTeamPosts = csvFormat(bufferTeamPostsRows);
     fs.writeFileSync(`${targetDir}/buffer_team_posts.csv`, csvBufferTeamPosts);
-    console.log(`Buffer team posts query complete, saved ${bufferTeamPostsRows.length} rows`);
+    
+    // Generate buffer_team_weekly_active_members.csv
+    const bufferTeamActiveMembers = formattedBufferTeamConsolidatedRows.map(row => ({
+      week: row.week,
+      active_team_members: row.active_team_members
+    }));
+    const csvBufferTeamActiveMembers = csvFormat(bufferTeamActiveMembers);
+    fs.writeFileSync(`${targetDir}/buffer_team_weekly_active_members.csv`, csvBufferTeamActiveMembers);
+    
+    // Generate buffer_team_weekly_median_posts.csv
+    const bufferTeamMedianPosts = formattedBufferTeamConsolidatedRows.map(row => ({
+      week: row.week,
+      median_posts_per_member: row.median_posts_per_member
+    }));
+    const csvBufferTeamMedianPosts = csvFormat(bufferTeamMedianPosts);
+    fs.writeFileSync(`${targetDir}/buffer_team_weekly_median_posts.csv`, csvBufferTeamMedianPosts);
+    
+    console.log(`Consolidated buffer team query complete, saved ${bufferTeamConsolidatedRows.length} rows to 3 CSV files`);
     
     // Query 9: Buffer Team Monthly Engagement
     console.log("Running buffer team monthly engagement query...");
@@ -266,7 +290,7 @@ async function executeQueries() {
     fs.writeFileSync(`${targetDir}/buffer_team_monthly_engagement.csv`, csvBufferTeamMonthlyEngagement);
     console.log(`Buffer team monthly engagement query complete, saved ${bufferTeamMonthlyEngagementRows.length} rows`);
     
-    // Query 10: Monthly Blog Pageviews
+    // Query 9: Monthly Blog Pageviews
     console.log("Running monthly blog pageviews query...");
     const monthlyBlogPageviewsRows = await runQuery(monthlyBlogPageviewsSql);
     
