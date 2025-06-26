@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="generator" content="Observable Framework v1.13.3">
+<title>Company Metrics - Buffer Transparent Metrics | Buffer Metrics</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&amp;display=swap" crossorigin>
+<link rel="preload" as="style" href="./_observablehq/theme-air,alt,wide.bef6cc26.css">
+<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&amp;display=swap" crossorigin>
+<link rel="stylesheet" type="text/css" href="./_observablehq/theme-air,alt,wide.bef6cc26.css">
+<link rel="modulepreload" href="./_observablehq/client.4ba413f8.js">
+<link rel="modulepreload" href="./_observablehq/runtime.e080113b.js">
+<link rel="modulepreload" href="./_observablehq/stdlib.ec062f48.js">
+<link rel="modulepreload" href="./_import/components/xmr.df7ca6ab.js">
+<link rel="modulepreload" href="./_npm/htl@0.3.1/72f4716c.js">
+<link rel="modulepreload" href="./_npm/@observablehq/plot@0.6.17/d761ef9b.js">
+<link rel="modulepreload" href="./_npm/d3@7.9.0/e780feca.js">
+<link rel="modulepreload" href="./_npm/d3-dsv@3.0.1/9cffc2bd.js">
+<link rel="modulepreload" href="./_npm/isoformat@0.2.1/18cbf477.js">
+<link rel="modulepreload" href="./_npm/interval-tree-1d@1.0.4/53fe8176.js">
+<link rel="modulepreload" href="./_npm/d3-array@3.2.4/e93ca09f.js">
+<link rel="modulepreload" href="./_npm/d3-axis@3.0.0/0f2de24d.js">
+<link rel="modulepreload" href="./_npm/d3-brush@3.0.0/65eb105b.js">
+<link rel="modulepreload" href="./_npm/d3-chord@3.0.1/7ef8fb2e.js">
+<link rel="modulepreload" href="./_npm/d3-color@3.1.0/aeb57b94.js">
+<link rel="modulepreload" href="./_npm/d3-contour@4.0.2/1d2aed74.js">
+<link rel="modulepreload" href="./_npm/d3-delaunay@6.0.4/5ced1d52.js">
+<link rel="modulepreload" href="./_npm/d3-dispatch@3.0.1/9ba9c7f3.js">
+<link rel="modulepreload" href="./_npm/d3-drag@3.0.0/4202580c.js">
+<link rel="modulepreload" href="./_npm/d3-ease@3.0.1/cdd7e898.js">
+<link rel="modulepreload" href="./_npm/d3-fetch@3.0.1/b4e2ad9a.js">
+<link rel="modulepreload" href="./_npm/d3-force@3.0.0/5e804d15.js">
+<link rel="modulepreload" href="./_npm/d3-format@3.1.0/86074ef6.js">
+<link rel="modulepreload" href="./_npm/d3-geo@3.1.1/40599fb3.js">
+<link rel="modulepreload" href="./_npm/d3-hierarchy@3.1.2/e49e792c.js">
+<link rel="modulepreload" href="./_npm/d3-interpolate@3.0.1/8d1e5425.js">
+<link rel="modulepreload" href="./_npm/d3-path@3.1.0/20d3f133.js">
+<link rel="modulepreload" href="./_npm/d3-polygon@3.0.1/7553081f.js">
+<link rel="modulepreload" href="./_npm/d3-quadtree@3.0.1/0dfd751c.js">
+<link rel="modulepreload" href="./_npm/d3-random@3.0.1/3c90ee06.js">
+<link rel="modulepreload" href="./_npm/d3-scale@4.0.2/843b6a76.js">
+<link rel="modulepreload" href="./_npm/d3-scale-chromatic@3.1.0/ba24c2e7.js">
+<link rel="modulepreload" href="./_npm/d3-selection@3.0.0/4d94e5b7.js">
+<link rel="modulepreload" href="./_npm/d3-shape@3.2.0/6d3a6726.js">
+<link rel="modulepreload" href="./_npm/d3-time@3.1.0/9f03c579.js">
+<link rel="modulepreload" href="./_npm/d3-time-format@4.1.0/07c9626f.js">
+<link rel="modulepreload" href="./_npm/d3-timer@3.0.1/b58a267d.js">
+<link rel="modulepreload" href="./_npm/d3-transition@3.0.1/004da2ac.js">
+<link rel="modulepreload" href="./_npm/d3-zoom@3.0.0/b5786b3f.js">
+<link rel="modulepreload" href="./_npm/binary-search-bounds@2.0.5/cbf6ba23.js">
+<link rel="modulepreload" href="./_npm/internmap@2.0.3/e08981d9.js">
+<link rel="modulepreload" href="./_npm/delaunator@5.0.1/02d43215.js">
+<link rel="modulepreload" href="./_npm/robust-predicates@3.0.2/aa00730b.js">
+
+    <link rel="icon" href="./_file/observable.1af93621.png" type="image/png" sizes="32x32">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&amp;display=swap" rel="stylesheet">
+    <style>
+      body {
+        font-family: "JetBrains Mono", monospace !important;
+      }
+      * {
+        font-family: "JetBrains Mono", monospace !important;
+      }
+    </style>
+  
+<script type="module">
+
+import {define} from "./_observablehq/client.4ba413f8.js";
+import {registerFile} from "./_observablehq/stdlib.ec062f48.js";
+
+registerFile("./data/chartmogul_mrr_events.csv", {"name":"./data/chartmogul_mrr_events.csv","mimeType":"text/csv","path":"./_file/data/chartmogul_mrr_events.7be90e2f.csv","lastModified":1750957485157,"size":6387});
+registerFile("./data/company_weekly_active_users.csv", {"name":"./data/company_weekly_active_users.csv","mimeType":"text/csv","path":"./_file/data/company_weekly_active_users.3291ec14.csv","lastModified":1750957443605,"size":924});
+registerFile("./data/company_weekly_signups.csv", {"name":"./data/company_weekly_signups.csv","mimeType":"text/csv","path":"./_file/data/company_weekly_signups.ff28f61c.csv","lastModified":1750957415946,"size":879});
+registerFile("./data/company_weekly_subscriptions.csv", {"name":"./data/company_weekly_subscriptions.csv","mimeType":"text/csv","path":"./_file/data/company_weekly_subscriptions.c03692c9.csv","lastModified":1750957420772,"size":811});
+registerFile("./data/last_query_timestamp.json", {"name":"./data/last_query_timestamp.json","mimeType":"application/json","path":"./_file/data/last_query_timestamp.89c7e47b.json","lastModified":1750958715453,"size":43});
+
+define({id: "fdb5422b", inputs: ["FileAttachment"], outputs: ["lastQueryTimestamp","lastRunDate"], body: async (FileAttachment) => {
+const lastQueryTimestamp = await FileAttachment("./data/last_query_timestamp.json").json();
+const lastRunDate = new Date(lastQueryTimestamp.lastRun).toLocaleString('en-US', { 
+  year: 'numeric', 
+  month: 'long', 
+  day: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+  timeZoneName: 'short'
+});
+return {lastQueryTimestamp,lastRunDate};
+}});
+
+define({id: "667ff6cf", mode: "inline", inputs: ["lastRunDate","display"], body: async (lastRunDate,display) => {
+display(await(
+lastRunDate
+))
+}});
+
+define({id: "4ce2beac", inputs: ["FileAttachment"], outputs: ["xmrChart","weeklySignups","weeklySubscriptions","weeklyActiveUsers","chartmogulMrrEvents"], body: async (FileAttachment) => {
+const {xmrChart} = await import("./_import/components/xmr.df7ca6ab.js");
+// Import the xmr component
+
+// Load data from CSV files
+const weeklySignups = FileAttachment("./data/company_weekly_signups.csv").csv({typed: true});
+const weeklySubscriptions = FileAttachment("./data/company_weekly_subscriptions.csv").csv({typed: true});
+const weeklyActiveUsers = FileAttachment("./data/company_weekly_active_users.csv").csv({typed: true});
+const chartmogulMrrEvents = FileAttachment("./data/chartmogul_mrr_events.csv").csv({typed: true});
+return {xmrChart,weeklySignups,weeklySubscriptions,weeklyActiveUsers,chartmogulMrrEvents};
+}});
+
+define({id: "572c6a45", inputs: ["xmrChart","weeklySignups","weeklyActiveUsers","weeklySubscriptions","Plot","chartmogulMrrEvents","html","display","resize"], outputs: ["weeklySignupsPlot","weeklyActiveUsersPlot","weeklySubscriptionStartsPlot","weeklyMRRMetricsPlot","xmrLegend"], body: (xmrChart,weeklySignups,weeklyActiveUsers,weeklySubscriptions,Plot,chartmogulMrrEvents,html,display,resize) => {
+function weeklySignupsPlot(width) {
+  return xmrChart({
+    metrics: weeklySignups,
+    title: "Weekly Signups (Last 52 Weeks)",
+    subtitle: "XmR Control Chart with Trend Analysis",
+    yField: "signups",
+    yLabel: "New Signups",
+    dateField: "week",
+    showMovingRange: false,
+    showTrend: true,
+    showSeasonality: true,
+    seasonalPeriod: 5 // 13 weeks for quarterly seasonality
+  });
+}
+
+function weeklyActiveUsersPlot(width) {
+  return xmrChart({
+    metrics: weeklyActiveUsers,
+    title: "Weekly Active Users (Last 52 Weeks)",
+    subtitle: "XmR Control Chart with Trend Analysis",
+    yField: "weekly_active_users",
+    yLabel: "Active Users",
+    dateField: "week",
+    showMovingRange: false,
+    showTrend: true,
+    showSeasonality: true,
+    seasonalPeriod: 5 // 13 weeks for quarterly seasonality
+  });
+}
+
+function weeklySubscriptionStartsPlot(width) {
+  return xmrChart({
+    metrics: weeklySubscriptions,
+    title: "Weekly New Subscriptions (Last 52 Weeks)",
+    subtitle: "XmR Control Chart with Trend Analysis",
+    yField: "new_customers",
+    yLabel: "New Customers",
+    dateField: "week",
+    showMovingRange: false,
+    showTrend: true,
+    showSeasonality: true,
+    seasonalPeriod: 5 // 13 weeks for quarterly seasonality
+  });
+}
+
+function weeklyMRRMetricsPlot(width) {
+  return Plot.plot({
+    title: "Weekly MRR Movement Events (Last 52 Weeks)",
+    y: {
+      grid: true,
+      label: "Number of Customers"
+    },
+    x: {
+      label: "Week",
+      tickRotate: 45
+    },
+    color: {
+      legend: true
+    },
+    marks: [
+      Plot.line(chartmogulMrrEvents, {
+        x: "week",
+        y: "customers",
+        stroke: "movement_type",
+        strokeWidth: 2,
+        curve: "natural"
+      }),
+      Plot.dot(chartmogulMrrEvents, {
+        x: "week", 
+        y: "customers",
+        stroke: "movement_type",
+        fill: "movement_type",
+        r: 3,
+        tip: true
+      })
+    ],
+    width: width || 1200,
+    height: 400,
+    marginBottom: 70,
+    marginLeft: 60
+  });
+}
+
+// XmR Chart Legend
+const xmrLegend = html`
+  <div style="
+    margin: 10px 0 20px 0;
+    padding: 12px 16px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    border-left: 4px solid #007bff;
+    font-size: 13px;
+    line-height: 1.5;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  ">
+    <div style="margin-bottom: 8px;"><strong>Weekly Signups Chart Guide:</strong></div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+      <span><span style="color: steelblue; font-weight: bold; font-size: 16px;">●</span> Normal week (expected variation)</span>
+      <span><span style="color: #dc3545; font-weight: bold; font-size: 16px;">●</span> Exceptional week (much higher/lower than expected)</span>
+      <span><span style="color: #fd7e14; font-weight: bold; font-size: 16px;">●</span> Potential pattern change (early warning)</span>
+      <span><span style="color: #ffc107; font-weight: bold; font-size: 16px;">●</span> Sustained shift (process has changed)</span>
+    </div>
+  </div>
+`;
+
+// Display all plots with custom layout
+display(html`
+  <div>
+    ${xmrLegend}
+    
+    <!-- Full-width Weekly Signups Chart -->
+    <div class="card" style="margin-bottom: 1rem;">
+      ${resize(width => weeklySignupsPlot(width))}
+    </div>
+    
+    <!-- Full-width Weekly Active Users Chart -->
+    <div class="card" style="margin-bottom: 1rem;">
+      ${resize(width => weeklyActiveUsersPlot(width))}
+    </div>
+    
+    <!-- Two-column grid for remaining charts -->
+    <div class="grid grid-cols-2">
+      <div class="card">${resize(width => weeklySubscriptionStartsPlot(width))}</div>
+      <div class="card">${resize(width => weeklyMRRMetricsPlot(width))}</div>
+    </div>
+  </div>
+`);
+return {weeklySignupsPlot,weeklyActiveUsersPlot,weeklySubscriptionStartsPlot,weeklyMRRMetricsPlot,xmrLegend};
+}});
+
+</script>
+</head>
+<body>
+<input id="observablehq-sidebar-toggle" type="checkbox" title="Toggle sidebar">
+<label id="observablehq-sidebar-backdrop" for="observablehq-sidebar-toggle"></label>
+<nav id="observablehq-sidebar">
+  <ol>
+    <label id="observablehq-sidebar-close" for="observablehq-sidebar-toggle"></label>
+    <li class="observablehq-link"><a href="./">Buffer Metrics</a></li>
+  </ol>
+  <ol>
+    <li class="observablehq-link"><a href="./">Dashboard Home</a></li>
+  </ol>
+  <section class="observablehq-section-active">
+    <summary>Dashboards</summary>
+    <ol>
+    <li class="observablehq-link observablehq-link-active"><a href="./company-metrics">Company Metrics</a></li>
+    <li class="observablehq-link"><a href="./marketing-metrics">Team of Creators</a></li>
+    <li class="observablehq-link"><a href="./monthly-marketing-report">Monthly Marketing Report</a></li>
+    </ol>
+  </section>
+</nav>
+<script>{const e=document.querySelector("#observablehq-sidebar"),o=document.querySelector("#observablehq-sidebar-toggle"),r=sessionStorage.getItem("observablehq-sidebar");r?o.checked=r==="true":o.indeterminate=!0;for(const t of document.querySelectorAll("#observablehq-sidebar summary")){const s=t.parentElement;switch(sessionStorage.getItem(`observablehq-sidebar:${t.textContent}`)){case"true":s.open=!0;break;case"false":s.classList.contains("observablehq-section-active")||(s.open=!1);break}}addEventListener("beforeunload",()=>sessionStorage.setItem("observablehq-sidebar-scrolly",`${e.scrollTop}`));const a=sessionStorage.getItem("observablehq-sidebar-scrolly");a!=null&&(e.style.cssText="overflow: hidden;",e.scrollTop=+a,e.style.cssText="");}</script>
+<div id="observablehq-center">
+<main id="observablehq-main" class="observablehq">
+<h1 id="key-business-metrics" tabindex="-1"><a class="observablehq-header-anchor" href="#key-business-metrics">Key Business Metrics</a></h1>
+<p>This dashboard shows high-level business metrics tracked at Buffer.</p>
+<div class="observablehq observablehq--block"><!--:fdb5422b:--></div>
+<div style="margin: 20px 0; padding: 12px; background-color: #f8f9fa; border-left: 4px solid #007bff; font-size: 14px; color: #666;">
+  <strong>Data current as of:</strong> <observablehq-loading></observablehq-loading><!--:667ff6cf:-->
+</div>
+<div class="observablehq observablehq--block"><!--:4ce2beac:--></div>
+<div class="observablehq observablehq--block"><!--:572c6a45:--></div>
+</main>
+<footer id="observablehq-footer">
+<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2025-06-26T13:37:07">Jun 26, 2025</a>.</div>
+</footer>
+</div>
+</body>
+</html>

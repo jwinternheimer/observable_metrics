@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="generator" content="Observable Framework v1.13.3">
+<title>Team of Creators Dashboard - Buffer Transparent Metrics | Buffer Metrics</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&amp;display=swap" crossorigin>
+<link rel="preload" as="style" href="./_observablehq/theme-air,alt,wide.bef6cc26.css">
+<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&amp;display=swap" crossorigin>
+<link rel="stylesheet" type="text/css" href="./_observablehq/theme-air,alt,wide.bef6cc26.css">
+<link rel="modulepreload" href="./_observablehq/client.4ba413f8.js">
+<link rel="modulepreload" href="./_observablehq/runtime.e080113b.js">
+<link rel="modulepreload" href="./_observablehq/stdlib.ec062f48.js">
+<link rel="modulepreload" href="./_npm/htl@0.3.1/72f4716c.js">
+<link rel="modulepreload" href="./_npm/@observablehq/plot@0.6.17/d761ef9b.js">
+<link rel="modulepreload" href="./_npm/d3-dsv@3.0.1/9cffc2bd.js">
+<link rel="modulepreload" href="./_npm/d3@7.9.0/e780feca.js">
+<link rel="modulepreload" href="./_npm/isoformat@0.2.1/18cbf477.js">
+<link rel="modulepreload" href="./_npm/interval-tree-1d@1.0.4/53fe8176.js">
+<link rel="modulepreload" href="./_npm/d3-array@3.2.4/e93ca09f.js">
+<link rel="modulepreload" href="./_npm/d3-axis@3.0.0/0f2de24d.js">
+<link rel="modulepreload" href="./_npm/d3-brush@3.0.0/65eb105b.js">
+<link rel="modulepreload" href="./_npm/d3-chord@3.0.1/7ef8fb2e.js">
+<link rel="modulepreload" href="./_npm/d3-color@3.1.0/aeb57b94.js">
+<link rel="modulepreload" href="./_npm/d3-contour@4.0.2/1d2aed74.js">
+<link rel="modulepreload" href="./_npm/d3-delaunay@6.0.4/5ced1d52.js">
+<link rel="modulepreload" href="./_npm/d3-dispatch@3.0.1/9ba9c7f3.js">
+<link rel="modulepreload" href="./_npm/d3-drag@3.0.0/4202580c.js">
+<link rel="modulepreload" href="./_npm/d3-ease@3.0.1/cdd7e898.js">
+<link rel="modulepreload" href="./_npm/d3-fetch@3.0.1/b4e2ad9a.js">
+<link rel="modulepreload" href="./_npm/d3-force@3.0.0/5e804d15.js">
+<link rel="modulepreload" href="./_npm/d3-format@3.1.0/86074ef6.js">
+<link rel="modulepreload" href="./_npm/d3-geo@3.1.1/40599fb3.js">
+<link rel="modulepreload" href="./_npm/d3-hierarchy@3.1.2/e49e792c.js">
+<link rel="modulepreload" href="./_npm/d3-interpolate@3.0.1/8d1e5425.js">
+<link rel="modulepreload" href="./_npm/d3-path@3.1.0/20d3f133.js">
+<link rel="modulepreload" href="./_npm/d3-polygon@3.0.1/7553081f.js">
+<link rel="modulepreload" href="./_npm/d3-quadtree@3.0.1/0dfd751c.js">
+<link rel="modulepreload" href="./_npm/d3-random@3.0.1/3c90ee06.js">
+<link rel="modulepreload" href="./_npm/d3-scale@4.0.2/843b6a76.js">
+<link rel="modulepreload" href="./_npm/d3-scale-chromatic@3.1.0/ba24c2e7.js">
+<link rel="modulepreload" href="./_npm/d3-selection@3.0.0/4d94e5b7.js">
+<link rel="modulepreload" href="./_npm/d3-shape@3.2.0/6d3a6726.js">
+<link rel="modulepreload" href="./_npm/d3-time@3.1.0/9f03c579.js">
+<link rel="modulepreload" href="./_npm/d3-time-format@4.1.0/07c9626f.js">
+<link rel="modulepreload" href="./_npm/d3-timer@3.0.1/b58a267d.js">
+<link rel="modulepreload" href="./_npm/d3-transition@3.0.1/004da2ac.js">
+<link rel="modulepreload" href="./_npm/d3-zoom@3.0.0/b5786b3f.js">
+<link rel="modulepreload" href="./_npm/binary-search-bounds@2.0.5/cbf6ba23.js">
+<link rel="modulepreload" href="./_npm/internmap@2.0.3/e08981d9.js">
+<link rel="modulepreload" href="./_npm/delaunator@5.0.1/02d43215.js">
+<link rel="modulepreload" href="./_npm/robust-predicates@3.0.2/aa00730b.js">
+
+    <link rel="icon" href="./_file/observable.1af93621.png" type="image/png" sizes="32x32">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&amp;display=swap" rel="stylesheet">
+    <style>
+      body {
+        font-family: "JetBrains Mono", monospace !important;
+      }
+      * {
+        font-family: "JetBrains Mono", monospace !important;
+      }
+    </style>
+  
+<script type="module">
+
+import {define} from "./_observablehq/client.4ba413f8.js";
+import {registerFile} from "./_observablehq/stdlib.ec062f48.js";
+
+registerFile("./data/buffer_team_monthly_engagement.csv", {"name":"./data/buffer_team_monthly_engagement.csv","mimeType":"text/csv","path":"./_file/data/buffer_team_monthly_engagement.92c3526f.csv","lastModified":1750857425766,"size":8158});
+registerFile("./data/buffer_team_posts.csv", {"name":"./data/buffer_team_posts.csv","mimeType":"text/csv","path":"./_file/data/buffer_team_posts.16f3b51f.csv","lastModified":1750857425766,"size":2105});
+registerFile("./data/buffer_team_weekly_active_members.csv", {"name":"./data/buffer_team_weekly_active_members.csv","mimeType":"text/csv","path":"./_file/data/buffer_team_weekly_active_members.f710232d.csv","lastModified":1750857425767,"size":1452});
+registerFile("./data/buffer_team_weekly_median_posts.csv", {"name":"./data/buffer_team_weekly_median_posts.csv","mimeType":"text/csv","path":"./_file/data/buffer_team_weekly_median_posts.888d3468.csv","lastModified":1750857425767,"size":1405});
+registerFile("./data/last_query_timestamp.json", {"name":"./data/last_query_timestamp.json","mimeType":"application/json","path":"./_file/data/last_query_timestamp.89c7e47b.json","lastModified":1750958715453,"size":43});
+
+define({id: "fdb5422b", inputs: ["FileAttachment"], outputs: ["lastQueryTimestamp","lastRunDate"], body: async (FileAttachment) => {
+const lastQueryTimestamp = await FileAttachment("./data/last_query_timestamp.json").json();
+const lastRunDate = new Date(lastQueryTimestamp.lastRun).toLocaleString('en-US', { 
+  year: 'numeric', 
+  month: 'long', 
+  day: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+  timeZoneName: 'short'
+});
+return {lastQueryTimestamp,lastRunDate};
+}});
+
+define({id: "667ff6cf", mode: "inline", inputs: ["lastRunDate","display"], body: async (lastRunDate,display) => {
+display(await(
+lastRunDate
+))
+}});
+
+define({id: "2c2ad928", inputs: ["FileAttachment"], outputs: ["bufferTeamPosts","bufferTeamMonthlyEngagement","bufferTeamWeeklyActiveMembers","bufferTeamWeeklyMedianPosts"], body: (FileAttachment) => {
+// Load data from CSV files
+const bufferTeamPosts = FileAttachment("./data/buffer_team_posts.csv").csv({typed: true});
+const bufferTeamMonthlyEngagement = FileAttachment("./data/buffer_team_monthly_engagement.csv").csv({typed: true});
+const bufferTeamWeeklyActiveMembers = FileAttachment("./data/buffer_team_weekly_active_members.csv").csv({typed: true});
+const bufferTeamWeeklyMedianPosts = FileAttachment("./data/buffer_team_weekly_median_posts.csv").csv({typed: true});
+return {bufferTeamPosts,bufferTeamMonthlyEngagement,bufferTeamWeeklyActiveMembers,bufferTeamWeeklyMedianPosts};
+}});
+
+define({id: "0ab9f339", inputs: ["Plot","bufferTeamWeeklyActiveMembers","bufferTeamPosts","bufferTeamWeeklyMedianPosts"], outputs: ["activeTeamMembersPlot","totalTeamPostsPlot","medianPostsPerMemberPlot","totalTeamReachPlot"], body: (Plot,bufferTeamWeeklyActiveMembers,bufferTeamPosts,bufferTeamWeeklyMedianPosts) => {
+// Create a function for the weekly active team members plot
+function activeTeamMembersPlot(width) {
+  return Plot.plot({
+    title: "Active Team Members",
+    y: { grid: true, label: "Number of Active Members" },
+    x: { label: "Week", tickRotate: 45 },
+    marks: [
+      Plot.line(bufferTeamWeeklyActiveMembers, {
+        x: "week",
+        y: "active_team_members",
+        stroke: "#2ECC71",
+        strokeWidth: 2,
+        curve: "natural"
+      }),
+      Plot.dot(bufferTeamWeeklyActiveMembers, {
+        x: "week",
+        y: "active_team_members",
+        fill: "#2ECC71",
+        r: 3,
+        tip: true
+      }),
+      Plot.ruleY([0])
+    ],
+    width: width || 900,
+    height: 400,
+    marginBottom: 70,
+    marginLeft: 60
+  });
+}
+
+// Create a function for the Buffer team posts plot
+function totalTeamPostsPlot(width) {
+  return Plot.plot({
+    title: "Total Team Posts",
+    y: { grid: true, label: "Number of Posts" },
+    x: { label: "Week", tickRotate: 45 },
+    marks: [
+      Plot.line(bufferTeamPosts, {
+        x: "week",
+        y: "posts",
+        stroke: "#2C7BB6",
+        strokeWidth: 2,
+        curve: "natural"
+      }),
+      Plot.dot(bufferTeamPosts, {
+        x: "week",
+        y: "posts",
+        fill: "#2C7BB6",
+        r: 3,
+        tip: true
+      }),
+      Plot.ruleY([0])
+    ],
+    width: width || 900,
+    height: 400,
+    marginBottom: 70,
+    marginLeft: 60
+  });
+}
+
+// Create a function for the median posts per team member plot
+function medianPostsPerMemberPlot(width) {
+  return Plot.plot({
+    title: "Median Posts Per Team Member",
+    y: { grid: true, label: "Median Posts per Member" },
+    x: { label: "Week", tickRotate: 45 },
+    marks: [
+      Plot.line(bufferTeamWeeklyMedianPosts, {
+        x: "week",
+        y: "median_posts_per_member",
+        stroke: "#9B59B6",
+        strokeWidth: 2,
+        curve: "natural"
+      }),
+      Plot.dot(bufferTeamWeeklyMedianPosts, {
+        x: "week",
+        y: "median_posts_per_member",
+        fill: "#9B59B6",
+        r: 3,
+        tip: true
+      }),
+      Plot.ruleY([0])
+    ],
+    width: width || 900,
+    height: 400,
+    marginBottom: 70,
+    marginLeft: 60
+  });
+}
+
+// Create a function for the Buffer team reach plot
+function totalTeamReachPlot(width) {
+  return Plot.plot({
+    title: "Total Team Reach",
+    y: { grid: true, label: "Total Reach" },
+    x: { label: "Week", tickRotate: 45 },
+    marks: [
+      Plot.line(bufferTeamPosts, {
+        x: "week",
+        y: "total_reach",
+        stroke: "#D7301F",
+        strokeWidth: 2,
+        curve: "natural"
+      }),
+      Plot.dot(bufferTeamPosts, {
+        x: "week",
+        y: "total_reach",
+        fill: "#D7301F",
+        r: 3,
+        tip: true
+      }),
+      Plot.ruleY([0])
+    ],
+    width: width || 900,
+    height: 400,
+    marginBottom: 70,
+    marginLeft: 60
+  });
+}
+return {activeTeamMembersPlot,totalTeamPostsPlot,medianPostsPerMemberPlot,totalTeamReachPlot};
+}});
+
+define({id: "cc5b05af", inputs: ["display","html","resize","activeTeamMembersPlot","totalTeamPostsPlot","medianPostsPerMemberPlot","totalTeamReachPlot"], body: (display,html,resize,activeTeamMembersPlot,totalTeamPostsPlot,medianPostsPerMemberPlot,totalTeamReachPlot) => {
+// Display all plots in a two-column grid
+display(html`
+  <div class="grid grid-cols-2">
+    <div class="card">${resize(width => activeTeamMembersPlot(width))}</div>
+    <div class="card">${resize(width => totalTeamPostsPlot(width))}</div>
+    <div class="card">${resize(width => medianPostsPerMemberPlot(width))}</div>
+    <div class="card">${resize(width => totalTeamReachPlot(width))}</div>
+  </div>
+`);
+}});
+
+define({id: "05154de6", outputs: ["currentDate","monthNames","currentMonth","currentYear"], body: () => {
+// Get current month and year for the title
+const currentDate = new Date();
+const monthNames = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+];
+const currentMonth = monthNames[currentDate.getMonth()];
+const currentYear = currentDate.getFullYear();
+return {currentDate,monthNames,currentMonth,currentYear};
+}});
+
+define({id: "67fbe648", mode: "inline", inputs: ["currentMonth","display"], body: async (currentMonth,display) => {
+display(await(
+currentMonth
+))
+}});
+
+define({id: "48c2bfa9", mode: "inline", inputs: ["currentYear","display"], body: async (currentYear,display) => {
+display(await(
+currentYear
+))
+}});
+
+define({id: "4bfbaac8", inputs: ["bufferTeamMonthlyEngagement","html","display"], outputs: ["bufferTeamEngagementTable"], body: (bufferTeamMonthlyEngagement,html,display) => {
+function bufferTeamEngagementTable() {
+  // Sort state
+  let sortColumn = 'likes'; // Default sort by likes
+  let sortDirection = 'desc'; // Default to descending
+  
+  // Calculate totals
+  const totals = bufferTeamMonthlyEngagement.reduce((acc, d) => ({
+    posts: acc.posts + (d.posts || 0),
+    likes: acc.likes + (d.likes || 0),
+    reposts: acc.reposts + (d.reposts || 0),
+    comments_and_replies: acc.comments_and_replies + (d.comments_and_replies || 0),
+    reach: acc.reach + (d.reach || 0),
+    impressions: acc.impressions + (d.impressions || 0),
+    views: acc.views + (d.views || 0),
+    current_streak_sum: acc.current_streak_sum + (d.current_streak || 0),
+    count: acc.count + 1
+  }), {
+    posts: 0,
+    likes: 0,
+    reposts: 0,
+    comments_and_replies: 0,
+    reach: 0,
+    impressions: 0,
+    views: 0,
+    current_streak_sum: 0,
+    count: 0
+  });
+  
+  // Calculate average streak for totals row
+  totals.current_streak_avg = totals.count > 0 ? Math.round(totals.current_streak_sum / totals.count) : 0;
+
+  // Sort function
+  function sortData(data, column, direction) {
+    return [...data].sort((a, b) => {
+      let aVal, bVal;
+      
+      if (column === 'name') {
+        aVal = (a.name || '').toLowerCase();
+        bVal = (b.name || '').toLowerCase();
+      } else {
+        aVal = a[column] || 0;
+        bVal = b[column] || 0;
+      }
+      
+      if (direction === 'asc') {
+        return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
+      } else {
+        return aVal < bVal ? 1 : aVal > bVal ? -1 : 0;
+      }
+    });
+  }
+
+  // Create container div
+  const container = document.createElement("div");
+  container.className = "engagement-table";
+
+  function render() {
+    const sortedData = sortData(bufferTeamMonthlyEngagement, sortColumn, sortDirection);
+    
+    const getSortIcon = (column) => {
+      if (sortColumn !== column) return '↕️';
+      return sortDirection === 'asc' ? '↑' : '↓';
+    };
+
+    container.innerHTML = '';
+    const table = html`
+      <table>
+        <thead>
+          <tr>
+            <th class="team-member-header sortable" data-column="name">
+              Team Member ${getSortIcon('name')}
+            </th>
+            <th class="metric-header sortable" data-column="current_streak">
+              Current Streak ${getSortIcon('current_streak')}
+            </th>
+            <th class="metric-header sortable" data-column="posts">
+              Posts ${getSortIcon('posts')}
+            </th>
+            <th class="metric-header sortable" data-column="likes">
+              Likes ${getSortIcon('likes')}
+            </th>
+            <th class="metric-header sortable" data-column="reposts">
+              Reposts ${getSortIcon('reposts')}
+            </th>
+            <th class="metric-header sortable" data-column="comments_and_replies">
+              Comments & Replies ${getSortIcon('comments_and_replies')}
+            </th>
+            <th class="metric-header sortable" data-column="reach">
+              Reach ${getSortIcon('reach')}
+            </th>
+            <th class="metric-header sortable" data-column="impressions">
+              Impressions ${getSortIcon('impressions')}
+            </th>
+            <th class="metric-header sortable" data-column="views">
+              Views ${getSortIcon('views')}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          ${sortedData.map(d => html`
+            <tr>
+              <td class="team-member">
+                ${d.avatar ? html`<img src="${d.avatar}" alt="${d.name}" class="avatar">` : html`<div class="avatar-placeholder">${d.name ? d.name.charAt(0).toUpperCase() : '?'}</div>`}
+                <span class="name">${d.name}</span>
+              </td>
+              <td class="metric-cell">${d.current_streak.toLocaleString()}</td>
+              <td class="metric-cell">${d.posts.toLocaleString()}</td>
+              <td class="metric-cell">${d.likes.toLocaleString()}</td>
+              <td class="metric-cell">${d.reposts.toLocaleString()}</td>
+              <td class="metric-cell">${d.comments_and_replies.toLocaleString()}</td>
+              <td class="metric-cell">${d.reach.toLocaleString()}</td>
+              <td class="metric-cell">${d.impressions.toLocaleString()}</td>
+              <td class="metric-cell">${d.views.toLocaleString()}</td>
+            </tr>
+          `)}
+        </tbody>
+        <tfoot>
+          <tr class="totals-row">
+            <td class="team-member"><strong>TOTALS</strong></td>
+            <td class="metric-cell"><strong>${totals.current_streak_avg} (avg)</strong></td>
+            <td class="metric-cell"><strong>${totals.posts.toLocaleString()}</strong></td>
+            <td class="metric-cell"><strong>${totals.likes.toLocaleString()}</strong></td>
+            <td class="metric-cell"><strong>${totals.reposts.toLocaleString()}</strong></td>
+            <td class="metric-cell"><strong>${totals.comments_and_replies.toLocaleString()}</strong></td>
+            <td class="metric-cell"><strong>${totals.reach.toLocaleString()}</strong></td>
+            <td class="metric-cell"><strong>${totals.impressions.toLocaleString()}</strong></td>
+            <td class="metric-cell"><strong>${totals.views.toLocaleString()}</strong></td>
+          </tr>
+        </tfoot>
+      </table>
+    `;
+    
+    container.appendChild(table);
+    
+    // Add click handlers to sortable headers
+    container.querySelectorAll('.sortable').forEach(header => {
+      header.addEventListener('click', () => {
+        const column = header.dataset.column;
+        if (sortColumn === column) {
+          sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+          sortColumn = column;
+          sortDirection = column === 'name' ? 'asc' : 'desc'; // Default to asc for names, desc for numbers
+        }
+        render();
+      });
+    });
+  }
+  
+  render();
+  return container;
+}
+
+display(bufferTeamEngagementTable());
+return {bufferTeamEngagementTable};
+}});
+
+</script>
+</head>
+<body>
+<input id="observablehq-sidebar-toggle" type="checkbox" title="Toggle sidebar">
+<label id="observablehq-sidebar-backdrop" for="observablehq-sidebar-toggle"></label>
+<nav id="observablehq-sidebar">
+  <ol>
+    <label id="observablehq-sidebar-close" for="observablehq-sidebar-toggle"></label>
+    <li class="observablehq-link"><a href="./">Buffer Metrics</a></li>
+  </ol>
+  <ol>
+    <li class="observablehq-link"><a href="./">Dashboard Home</a></li>
+  </ol>
+  <section class="observablehq-section-active">
+    <summary>Dashboards</summary>
+    <ol>
+    <li class="observablehq-link"><a href="./company-metrics">Company Metrics</a></li>
+    <li class="observablehq-link observablehq-link-active"><a href="./marketing-metrics">Team of Creators</a></li>
+    <li class="observablehq-link"><a href="./monthly-marketing-report">Monthly Marketing Report</a></li>
+    </ol>
+  </section>
+</nav>
+<script>{const e=document.querySelector("#observablehq-sidebar"),o=document.querySelector("#observablehq-sidebar-toggle"),r=sessionStorage.getItem("observablehq-sidebar");r?o.checked=r==="true":o.indeterminate=!0;for(const t of document.querySelectorAll("#observablehq-sidebar summary")){const s=t.parentElement;switch(sessionStorage.getItem(`observablehq-sidebar:${t.textContent}`)){case"true":s.open=!0;break;case"false":s.classList.contains("observablehq-section-active")||(s.open=!1);break}}addEventListener("beforeunload",()=>sessionStorage.setItem("observablehq-sidebar-scrolly",`${e.scrollTop}`));const a=sessionStorage.getItem("observablehq-sidebar-scrolly");a!=null&&(e.style.cssText="overflow: hidden;",e.scrollTop=+a,e.style.cssText="");}</script>
+<div id="observablehq-center">
+<main id="observablehq-main" class="observablehq">
+<h1 id="team-of-creators-dashboard" tabindex="-1"><a class="observablehq-header-anchor" href="#team-of-creators-dashboard">Team of Creators Dashboard</a></h1>
+<div class="observablehq observablehq--block"><!--:fdb5422b:--></div>
+<div style="margin: 20px 0; padding: 12px; background-color: #f8f9fa; border-left: 4px solid #007bff; font-size: 14px; color: #666;">
+  <strong>Data current as of:</strong> <observablehq-loading></observablehq-loading><!--:667ff6cf:-->
+</div>
+<div class="observablehq observablehq--block"><!--:2c2ad928:--></div>
+<div class="observablehq observablehq--block"><!--:0ab9f339:--></div>
+<div class="observablehq observablehq--block"><!--:cc5b05af:--></div>
+<div class="observablehq observablehq--block"><!--:05154de6:--></div>
+<div class="section-header">
+  <h2>Buffer Team Monthly Engagement - <observablehq-loading></observablehq-loading><!--:67fbe648:--> <observablehq-loading></observablehq-loading><!--:48c2bfa9:--></h2>
+</div>
+<div class="observablehq observablehq--block"><!--:4bfbaac8:--></div>
+<style>
+.grid {
+  display: grid;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.grid-cols-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-colspan-2 {
+  grid-column: span 2 / span 2;
+}
+
+.card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1rem;
+  background-color: white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.engagement-table {
+  margin: 1rem 0;
+  border-radius: 8px;
+  overflow-x: auto;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.engagement-table table {
+  width: 100%;
+  min-width: 1075px;
+  border-collapse: collapse;
+  background-color: white;
+  margin: 0;
+  table-layout: fixed;
+}
+
+.engagement-table table thead,
+.engagement-table table tbody,
+.engagement-table table tfoot {
+  display: table-header-group;
+}
+
+.engagement-table table tbody {
+  display: table-row-group;
+}
+
+.engagement-table table tfoot {
+  display: table-footer-group;
+}
+
+.engagement-table th,
+.engagement-table td {
+  padding: 12px 8px;
+  border-bottom: 1px solid #ddd;
+  vertical-align: middle;
+  box-sizing: border-box;
+}
+
+.engagement-table .metric-header,
+.engagement-table .metric-cell {
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+}
+
+.engagement-table thead {
+  display: table-header-group;
+}
+
+.engagement-table tfoot {
+  display: table-footer-group;
+}
+
+.engagement-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.engagement-table th.sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease;
+}
+
+.engagement-table th.sortable:hover {
+  background-color: #e9ecef;
+}
+
+.engagement-table th.sortable:active {
+  background-color: #dee2e6;
+}
+
+.team-member-header {
+  text-align: left;
+  width: 200px !important;
+  min-width: 200px !important;
+  max-width: 200px !important;
+}
+
+.metric-header {
+  text-align: right;
+  width: 125px !important;
+  min-width: 125px !important;
+  max-width: 125px !important;
+}
+
+.engagement-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.team-member {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  width: 200px !important;
+  min-width: 200px !important;
+  max-width: 200px !important;
+}
+
+.metric-cell {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  width: 125px !important;
+  min-width: 125px !important;
+  max-width: 125px !important;
+  white-space: nowrap;
+}
+
+.totals-row {
+  background-color: #f8f9fa !important;
+  border-top: 2px solid #dee2e6 !important;
+}
+
+.totals-row td {
+  border-bottom: none !important;
+  padding-top: 16px !important;
+  padding-bottom: 16px !important;
+  font-weight: bold;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e9ecef;
+  flex-shrink: 0;
+}
+
+.avatar-placeholder {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #6c757d;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  border: 2px solid #e9ecef;
+  flex-shrink: 0;
+}
+
+.name {
+  font-weight: 500;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.section-header {
+  margin: 2rem 0 1rem 0;
+}
+
+.section-header h2 {
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.section-header p {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+</style></main>
+<footer id="observablehq-footer">
+<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2025-06-26T13:37:07">Jun 26, 2025</a>.</div>
+</footer>
+</div>
+</body>
+</html>
