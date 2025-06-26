@@ -1,5 +1,5 @@
 .DS_Store
-# /dist/  # Allow dist/ for GitHub Pages deployment
+/dist/
 /node_modules/
 yarn-error.log
 npm-debug.log
