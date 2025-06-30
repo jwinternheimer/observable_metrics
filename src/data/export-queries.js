@@ -257,8 +257,7 @@ async function executeQueries() {
     // Generate buffer_team_posts.csv (original metrics)
     const bufferTeamPostsRows = formattedBufferTeamConsolidatedRows.map(row => ({
       week: row.week,
-      posts: row.posts,
-      total_engagement: row.total_engagement,
+      posts: row.total_posts,
       total_reach: row.total_reach
     }));
     const csvBufferTeamPosts = csvFormat(bufferTeamPostsRows);

@@ -1,9 +1,19 @@
 export default `
-with team_organizations as (
-  select id as organization_id
-  from dbt_buffer.core_organizations
-  where is_deleted is not true
-    and id in (
+with weekly_posts as (
+  select
+    timestamp_trunc(up.sent_at, week) as week
+    , up.organization_id
+    , count(up.id) as posts
+    , coalesce(sum(greatest(
+        ifnull(up.reach, 0),
+        ifnull(up.impressions, 0),
+        ifnull(up.views, 0)
+      )), 0) as total_reach
+  from dbt_buffer.publish_updates as up
+  where date(timestamp_trunc(up.sent_at, week)) between
+      date_sub(current_date, interval 52 week) and 
+      date_sub(current_date, interval 1 week)
+      and up.organization_id in (
       '58b45b3c2094efc479720856', '60b8a7b23bf8458ff8109786', '5f1f00e8b69d160d4676f4c5',
       '592752f4dcab3cf176c607d4', '60b8a79a0677fa7577082ada', '57b45291fe35a08103841504',
       '61b5880de5e21457abd03eb7', '645912daf924a7c53bf40cfc', '63c9ad57d39b920d1fb2ca5b',
@@ -28,69 +38,16 @@ with team_organizations as (
       '60dd6c5da74491519a765143', '664b9302790e6ab9db78b364', '621619b1a21d6f11d31086ad',
       '6807a68bca88be80a98f20a8', '660ae0c1e0c26f680ca147db', '5ca1daf11d99bc38db020083'
     )
-),
-
-team_members as (
-  select distinct
-    a.id as account_id,
-    a.organization_id
-  from dbt_buffer.core_accounts a
-  inner join team_organizations o on a.organization_id = o.organization_id
-),
-
-weekly_posts as (
-  select
-    timestamp_trunc(up.sent_at, week) as week,
-    up.account_id,
-    count(up.id) as posts_count
-  from dbt_buffer.publish_updates up
-  inner join team_organizations o on up.organization_id = o.organization_id
-  where date(timestamp_trunc(up.sent_at, week)) between
-      date_sub(current_date, interval 52 week) and 
-      date_sub(current_date, interval 1 week)
-  group by 1, 2
-),
-
-weeks as (
-  select distinct week
-  from weekly_posts
-),
-
-all_member_weeks as (
-  select 
-    w.week,
-    tm.account_id
-  from weeks w
-  cross join team_members tm
-),
-
-posts_per_member_per_week as (
-  select
-    amw.week,
-    amw.account_id,
-    coalesce(wp.posts_count, 0) as posts_count
-  from all_member_weeks amw
-  left join weekly_posts wp on amw.week = wp.week and amw.account_id = wp.account_id
+  group by 1,2
 )
 
 select
-  pmw.week,
-  -- Original buffer team posts metrics
-  sum(pmw.posts_count) as posts,
-  coalesce(sum(up.total_engagements), 0) as total_engagement,
-  coalesce(sum(greatest(
-    ifnull(up.reach, 0),
-    ifnull(up.impressions, 0),
-    ifnull(up.views, 0)
-  )), 0) as total_reach,
-  -- New active members metric
-  count(case when pmw.posts_count > 0 then pmw.account_id end) as active_team_members,
-  -- New median posts metric
-  approx_quantiles(pmw.posts_count, 2)[offset(1)] as median_posts_per_member
-from posts_per_member_per_week pmw
-left join dbt_buffer.publish_updates up 
-  on pmw.account_id = up.account_id 
-  and timestamp_trunc(up.sent_at, week) = pmw.week
-group by pmw.week
-order by pmw.week asc
+  week
+  , count(distinct organization_id) as active_team_members
+  , sum(posts) as total_posts
+  , sum(total_reach) as total_reach
+  , approx_quantiles(posts, 2)[offset(1)] as median_posts_per_member
+from weekly_posts
+group by 1
+order by week asc
 `;

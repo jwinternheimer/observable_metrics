@@ -21,7 +21,7 @@ const lastRunDate = new Date(lastQueryTimestamp.lastRun).toLocaleString('en-US',
 </div>
 
 ```js
-// Load data from CSV files
+// Load data from CSV files - using consolidated query data
 const bufferTeamPosts = FileAttachment("data/buffer_team_posts.csv").csv({typed: true});
 const bufferTeamMonthlyEngagement = FileAttachment("data/buffer_team_monthly_engagement.csv").csv({typed: true});
 const bufferTeamWeeklyActiveMembers = FileAttachment("data/buffer_team_weekly_active_members.csv").csv({typed: true});
