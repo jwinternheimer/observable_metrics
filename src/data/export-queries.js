@@ -12,6 +12,7 @@ import monthlyFtsSql from "./query-monthly-fts.sql.js";
 import bufferTeamConsolidatedSql from "./query-buffer-team-consolidated.sql.js";
 import bufferTeamMonthlyEngagementSql from "./query-buffer-team-monthly-engagement.sql.js";
 import monthlyBlogPageviewsSql from "./query-monthly-blog-pageviews.sql.js";
+import blogAssistedSignupsSql from "./query-blog-assisted-signups.sql.js";
 
 // Ensure target directory exists
 const targetDir = "./src/data";
@@ -144,15 +145,15 @@ async function executeQueries() {
     
     // Format dates properly
     const formattedSignupsBySourceRows = signupsBySourceRows.map(row => {
-      if (row.week instanceof Date) {
+      if (row.month instanceof Date) {
         return {
           ...row,
-          week: row.week.toISOString().split('T')[0] // Convert to YYYY-MM-DD
+          month: row.month.toISOString().split('T')[0] // Convert to YYYY-MM-DD
         };
-      } else if (typeof row.week === 'object') {
+      } else if (typeof row.month === 'object') {
         return {
           ...row,
-          week: String(row.week.value || JSON.stringify(row.week))
+          month: String(row.month.value || JSON.stringify(row.month))
         };
       }
       return row;
@@ -312,6 +313,30 @@ async function executeQueries() {
     const csvMonthlyBlogPageviews = csvFormat(formattedMonthlyBlogPageviewsRows);
     fs.writeFileSync(`${targetDir}/company_monthly_blog_pageviews.csv`, csvMonthlyBlogPageviews);
     console.log(`Monthly blog pageviews query complete, saved ${monthlyBlogPageviewsRows.length} rows`);
+    
+    // Query 10: Blog Assisted Signups
+    console.log("Running blog assisted signups query...");
+    const blogAssistedSignupsRows = await runQuery(blogAssistedSignupsSql);
+    
+    // Format dates properly
+    const formattedBlogAssistedSignupsRows = blogAssistedSignupsRows.map(row => {
+      if (row.month instanceof Date) {
+        return {
+          ...row,
+          month: row.month.toISOString().split('T')[0] // Convert to YYYY-MM-DD
+        };
+      } else if (typeof row.month === 'object') {
+        return {
+          ...row,
+          month: String(row.month.value || JSON.stringify(row.month))
+        };
+      }
+      return row;
+    });
+    
+    const csvBlogAssistedSignups = csvFormat(formattedBlogAssistedSignupsRows);
+    fs.writeFileSync(`${targetDir}/blog_assisted_signups.csv`, csvBlogAssistedSignups);
+    console.log(`Blog assisted signups query complete, saved ${blogAssistedSignupsRows.length} rows`);
     
     // Update the lock file
     updateLockFile();

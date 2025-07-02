@@ -21,10 +21,33 @@ const lastRunDate = new Date(lastQueryTimestamp.lastRun).toLocaleString('en-US',
 </div>
 
 ```js
-// Load data
-const monthlySignupsData = FileAttachment("data/company_monthly_signups.csv").csv({typed: true});
-const monthlyFtsData = FileAttachment("data/company_monthly_fts.csv").csv({typed: true});
-const monthlyBlogPageviewsData = FileAttachment("data/company_monthly_blog_pageviews.csv").csv({typed: true});
+// Load data and fix date parsing to avoid timezone issues
+const monthlySignupsRaw = await FileAttachment("data/company_monthly_signups.csv").csv();
+const monthlySignupsData = monthlySignupsRaw.map(d => ({
+  ...d,
+  month: new Date(d.month + "T00:00:00"),
+  signups: +d.signups
+}));
+
+const monthlyFtsRaw = await FileAttachment("data/company_monthly_fts.csv").csv();
+const monthlyFtsData = monthlyFtsRaw.map(d => ({
+  ...d,
+  month: new Date(d.month + "T00:00:00"),
+  fts: +d.fts
+}));
+
+const monthlyBlogPageviewsRaw = await FileAttachment("data/company_monthly_blog_pageviews.csv").csv();
+const monthlyBlogPageviewsData = monthlyBlogPageviewsRaw.map(d => ({
+  ...d,
+  month: new Date(d.month + "T00:00:00"),
+  blog_pageviews: +d.blog_pageviews
+}));
+
+const blogAssistedSignupsRaw = await FileAttachment("data/blog_assisted_signups.csv").csv();
+const blogAssistedSignupsData = blogAssistedSignupsRaw.map(d => ({
+  month: new Date(d.month + "T00:00:00"),
+  sessions: +d.sessions
+}));
 ```
 
 ```js
@@ -159,25 +182,70 @@ function monthlyBlogPageviewsPlot(width) {
     marginLeft: 60
   });
 }
+
+function blogAssistedSignupsPlot(width) {
+  return Plot.plot({
+    title: "Monthly Blog Assisted Signups (Last 13 Months)",
+    y: {
+      grid: true,
+      label: "Sessions"
+    },
+    x: {
+      label: "Month",
+      tickRotate: 45
+    },
+    marks: [
+      Plot.line(blogAssistedSignupsData, {
+        x: "month",
+        y: "sessions",
+        stroke: "darkgreen",
+        strokeWidth: 3,
+        curve: "natural"
+      }),
+      Plot.dot(blogAssistedSignupsData, {
+        x: "month",
+        y: "sessions",
+        fill: "darkgreen",
+        r: 3,
+        tip: {
+          format: {
+            x: d => new Date(d).toLocaleDateString(),
+            y: d => d.toLocaleString()
+          }
+        }
+      })
+    ],
+    width: width || 1200,
+    height: 400,
+    marginBottom: 70,
+    marginLeft: 60
+  });
+}
 ```
 
 ## Monthly Trends
 
-<div class="grid grid-cols-2">
+<div class="grid grid-cols-3">
   <div class="card">${resize(width => monthlyFtsPlot(width))}</div>
   <div class="card">${resize(width => monthlyBlogPageviewsPlot(width))}</div>
+  <div class="card">${resize(width => blogAssistedSignupsPlot(width))}</div>
 </div>
 
 ```js
 // Load signups by source data
-const signupsBySource = FileAttachment("data/signups_by_source.csv").csv({typed: true});
+const signupsBySourceRaw = await FileAttachment("data/signups_by_source.csv").csv();
+const signupsBySource = signupsBySourceRaw.map(d => ({
+  month: new Date(d.month + "T00:00:00"), // Parse as local date to avoid timezone shift
+  referrer: d.referrer,
+  signups: +d.signups
+}));
 ```
 
 ## Signups by Attribution Source
 
 ```js
-// Create a function to generate the weekly signups by referrer plot
-function weeklySignupsByReferrerPlot(width) {
+// Create a function to generate the monthly signups by referrer plot
+function monthlySignupsByReferrerPlot(width) {
   // List of referrers
   const referrers = [
     "organic_search", "buffer", "direct", "paid_search", "llm",
@@ -222,20 +290,20 @@ function weeklySignupsByReferrerPlot(width) {
     const filtered = signupsBySource.filter(d => selected.includes(d.referrer));
 
     const plot = Plot.plot({
-      title: `Weekly Signups by Referrer Source (Last 52 Weeks)`,
+      title: `Monthly Signups by Referrer Source (Last 13 Months)`,
       y: { grid: true, label: "Signups" },
-      x: { label: "Week", tickRotate: 45 },
+      x: { label: "Month", tickRotate: 45 },
       color: { legend: true },
       marks: [
         Plot.line(filtered, {
-          x: "week",
+          x: "month",
           y: "signups",
           stroke: "referrer",
           strokeWidth: 2,
           curve: "natural"
         }),
         Plot.dot(filtered, {
-          x: "week",
+          x: "month",
           y: "signups",
           stroke: "referrer",
           fill: "referrer",
@@ -262,5 +330,5 @@ function weeklySignupsByReferrerPlot(width) {
 ```
 
 <div class="grid">
-  <div class="card">${resize(width => weeklySignupsByReferrerPlot(width))}</div>
+  <div class="card">${resize(width => monthlySignupsByReferrerPlot(width))}</div>
 </div>
