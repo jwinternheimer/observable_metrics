@@ -45,7 +45,7 @@ select
     , a.name
     , a.current_streak
     , count(distinct up.id) as posts
-    , ifnull(sum(up.likes), 0) as likes
+    , coalesce(sum(up.likes), 0) + coalesce(sum(up.reactions), 0) + coalesce(sum(up.favorites), 0)  as likes
     , safe_add(ifnull(sum(up.reposts), 0), ifnull(sum(up.retweets), 0)) as reposts
     , safe_add(ifnull(sum(up.replies), 0), ifnull(sum(up.comments), 0)) as comments_and_replies
     , sum(ifnull(up.reach, 0)) as reach
