@@ -1,0 +1,9 @@
+service,name,avatar,posts,likes,reposts,comments_and_replies,reach,impressions,views
+linkedin,Buffer,https://buffer-channel-avatars-bucket.s3.amazonaws.com/5c93a743dcfa5a327d653ef9_1748421881600,26,1526,0,190,114400,0,11236
+facebook,Buffer,https://buffer-channel-avatars-bucket.s3.amazonaws.com/605e1ee359f92514a301a994,19,10,0,0,0,1256,0
+threads,buffer,https://buffer-channel-avatars-bucket.s3.amazonaws.com/6679782f7839e9e8790483ee_1750379454149,52,380,37,41,0,0,17775
+twitter,buffer,https://pbs.twimg.com/profile_images/1418307222313054211/EF-ka8yB_normal.jpg,2,34,11,14,24723,0,0
+startPage,buffer,https://buffer-start-page-uploads.s3.amazonaws.com/defaults/1630246015634.buffer-logo.png,1,0,0,0,0,0,0
+bluesky,buffer.com,https://cdn.bsky.app/img/avatar/plain/did:plc:knoepjiqknech5vqiht4bqu6/bafkreiahmauza6pxtr6s2qplw3h6xtzsn3qii5oyslv3xizj6ixi3bqcte@jpeg,19,285,29,24,0,0,0
+instagram,buffer,https://buffer-channel-avatars-bucket.s3.amazonaws.com/602bbb466de888249b11abba_1752087229719,14,658,0,64,19877,0,35969
+mastodon,bufferapp,https://files.mastodon.social/accounts/avatars/110/538/370/236/935/552/original/0eede249ea60d5ad.jpeg,1,3,0,0,0,0,0

@@ -13,6 +13,7 @@ import bufferTeamConsolidatedSql from "./query-buffer-team-consolidated.sql.js";
 import bufferTeamMonthlyEngagementSql from "./query-buffer-team-monthly-engagement.sql.js";
 import monthlyBlogPageviewsSql from "./query-monthly-blog-pageviews.sql.js";
 import blogAssistedSignupsSql from "./query-blog-assisted-signups.sql.js";
+import bufferChannelMonthlyPerformanceSql from "./query-buffer-channel-monthly-performance.sql.js";
 
 // Ensure target directory exists
 const targetDir = "./src/data";
@@ -337,6 +338,14 @@ async function executeQueries() {
     const csvBlogAssistedSignups = csvFormat(formattedBlogAssistedSignupsRows);
     fs.writeFileSync(`${targetDir}/blog_assisted_signups.csv`, csvBlogAssistedSignups);
     console.log(`Blog assisted signups query complete, saved ${blogAssistedSignupsRows.length} rows`);
+    
+    // Query 11: Buffer Channel Monthly Performance
+    console.log("Running buffer channel monthly performance query...");
+    const bufferChannelMonthlyPerformanceRows = await runQuery(bufferChannelMonthlyPerformanceSql);
+    
+    const csvBufferChannelMonthlyPerformance = csvFormat(bufferChannelMonthlyPerformanceRows);
+    fs.writeFileSync(`${targetDir}/buffer-channel-monthly-performance.csv`, csvBufferChannelMonthlyPerformance);
+    console.log(`Buffer channel monthly performance query complete, saved ${bufferChannelMonthlyPerformanceRows.length} rows`);
     
     // Update the lock file
     updateLockFile();
