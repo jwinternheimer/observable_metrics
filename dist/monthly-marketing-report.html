@@ -13,6 +13,7 @@
 <link rel="modulepreload" href="./_observablehq/client.4ba413f8.js">
 <link rel="modulepreload" href="./_observablehq/runtime.e080113b.js">
 <link rel="modulepreload" href="./_observablehq/stdlib.ec062f48.js">
+<link rel="modulepreload" href="./_npm/htl@0.3.1/72f4716c.js">
 <link rel="modulepreload" href="./_npm/@observablehq/plot@0.6.17/d761ef9b.js">
 <link rel="modulepreload" href="./_npm/d3-dsv@3.0.1/9cffc2bd.js">
 <link rel="modulepreload" href="./_npm/d3@7.9.0/e780feca.js">
@@ -68,11 +69,13 @@
 import {define} from "./_observablehq/client.4ba413f8.js";
 import {registerFile} from "./_observablehq/stdlib.ec062f48.js";
 
-registerFile("./data/company_monthly_blog_pageviews.csv", {"name":"./data/company_monthly_blog_pageviews.csv","mimeType":"text/csv","path":"./_file/data/company_monthly_blog_pageviews.9e01b1da.csv","lastModified":1750857425768,"size":263});
-registerFile("./data/company_monthly_fts.csv", {"name":"./data/company_monthly_fts.csv","mimeType":"text/csv","path":"./_file/data/company_monthly_fts.4adcb619.csv","lastModified":1750957492368,"size":256});
-registerFile("./data/company_monthly_signups.csv", {"name":"./data/company_monthly_signups.csv","mimeType":"text/csv","path":"./_file/data/company_monthly_signups.f420adaf.csv","lastModified":1750957489655,"size":244});
-registerFile("./data/last_query_timestamp.json", {"name":"./data/last_query_timestamp.json","mimeType":"application/json","path":"./_file/data/last_query_timestamp.89c7e47b.json","lastModified":1750958715453,"size":43});
-registerFile("./data/signups_by_source.csv", {"name":"./data/signups_by_source.csv","mimeType":"text/csv","path":"./_file/data/signups_by_source.23b4707f.csv","lastModified":1750957447926,"size":15122});
+registerFile("./data/blog_assisted_signups.csv", {"name":"./data/blog_assisted_signups.csv","mimeType":"text/csv","path":"./_file/data/blog_assisted_signups.c312a5cb.csv","lastModified":1756326055976,"size":208});
+registerFile("./data/buffer-channel-monthly-performance.csv", {"name":"./data/buffer-channel-monthly-performance.csv","mimeType":"text/csv","path":"./_file/data/buffer-channel-monthly-performance.be9f7c60.csv","lastModified":1756326060195,"size":923});
+registerFile("./data/company_monthly_blog_pageviews.csv", {"name":"./data/company_monthly_blog_pageviews.csv","mimeType":"text/csv","path":"./_file/data/company_monthly_blog_pageviews.e90020b6.csv","lastModified":1756326054870,"size":262});
+registerFile("./data/company_monthly_fts.csv", {"name":"./data/company_monthly_fts.csv","mimeType":"text/csv","path":"./_file/data/company_monthly_fts.baf0a5ee.csv","lastModified":1756326047089,"size":256});
+registerFile("./data/company_monthly_signups.csv", {"name":"./data/company_monthly_signups.csv","mimeType":"text/csv","path":"./_file/data/company_monthly_signups.be94e9c6.csv","lastModified":1756326042598,"size":246});
+registerFile("./data/last_query_timestamp.json", {"name":"./data/last_query_timestamp.json","mimeType":"application/json","path":"./_file/data/last_query_timestamp.9de25ed0.json","lastModified":1756326060196,"size":43});
+registerFile("./data/signups_by_source.csv", {"name":"./data/signups_by_source.csv","mimeType":"text/csv","path":"./_file/data/signups_by_source.f9ac1256.csv","lastModified":1756326017147,"size":3691});
 
 define({id: "fdb5422b", inputs: ["FileAttachment"], outputs: ["lastQueryTimestamp","lastRunDate"], body: async (FileAttachment) => {
 const lastQueryTimestamp = await FileAttachment("./data/last_query_timestamp.json").json();
@@ -93,12 +96,49 @@ lastRunDate
 ))
 }});
 
-define({id: "57442a1d", inputs: ["FileAttachment"], outputs: ["monthlySignupsData","monthlyFtsData","monthlyBlogPageviewsData"], body: (FileAttachment) => {
-// Load data
-const monthlySignupsData = FileAttachment("./data/company_monthly_signups.csv").csv({typed: true});
-const monthlyFtsData = FileAttachment("./data/company_monthly_fts.csv").csv({typed: true});
-const monthlyBlogPageviewsData = FileAttachment("./data/company_monthly_blog_pageviews.csv").csv({typed: true});
-return {monthlySignupsData,monthlyFtsData,monthlyBlogPageviewsData};
+define({id: "00e463f5", inputs: ["FileAttachment"], outputs: ["monthlySignupsRaw","monthlySignupsData","monthlyFtsRaw","monthlyFtsData","monthlyBlogPageviewsRaw","monthlyBlogPageviewsData","blogAssistedSignupsRaw","blogAssistedSignupsData","bufferChannelPerformanceRaw","bufferChannelPerformance"], body: async (FileAttachment) => {
+// Load data and fix date parsing to avoid timezone issues
+const monthlySignupsRaw = await FileAttachment("./data/company_monthly_signups.csv").csv();
+const monthlySignupsData = monthlySignupsRaw.map(d => ({
+  ...d,
+  month: new Date(d.month + "T00:00:00"),
+  signups: +d.signups
+}));
+
+const monthlyFtsRaw = await FileAttachment("./data/company_monthly_fts.csv").csv();
+const monthlyFtsData = monthlyFtsRaw.map(d => ({
+  ...d,
+  month: new Date(d.month + "T00:00:00"),
+  fts: +d.fts
+}));
+
+const monthlyBlogPageviewsRaw = await FileAttachment("./data/company_monthly_blog_pageviews.csv").csv();
+const monthlyBlogPageviewsData = monthlyBlogPageviewsRaw.map(d => ({
+  ...d,
+  month: new Date(d.month + "T00:00:00"),
+  blog_pageviews: +d.blog_pageviews
+}));
+
+const blogAssistedSignupsRaw = await FileAttachment("./data/blog_assisted_signups.csv").csv();
+const blogAssistedSignupsData = blogAssistedSignupsRaw.map(d => ({
+  month: new Date(d.month + "T00:00:00"),
+  sessions: +d.sessions
+}));
+
+const bufferChannelPerformanceRaw = await FileAttachment("./data/buffer-channel-monthly-performance.csv").csv();
+const bufferChannelPerformance = bufferChannelPerformanceRaw.map(d => ({
+  service: d.service,
+  name: d.name,
+  avatar: d.avatar,
+  posts: +d.posts,
+  likes: +d.likes,
+  reposts: +d.reposts,
+  comments_and_replies: +d.comments_and_replies,
+  reach: +d.reach,
+  impressions: +d.impressions,
+  views: +d.views
+}));
+return {monthlySignupsRaw,monthlySignupsData,monthlyFtsRaw,monthlyFtsData,monthlyBlogPageviewsRaw,monthlyBlogPageviewsData,blogAssistedSignupsRaw,blogAssistedSignupsData,bufferChannelPerformanceRaw,bufferChannelPerformance};
 }});
 
 define({id: "7955b02f", inputs: ["monthlySignupsData","monthlyFtsData","monthlyBlogPageviewsData"], outputs: ["dateObj","date","formattedSignups","momGrowth","formattedFts","momGrowthFts","formattedBlogPageviews","momGrowthBlogPageviews"], body: (monthlySignupsData,monthlyFtsData,monthlyBlogPageviewsData) => {
@@ -187,7 +227,7 @@ display(await(
 ))
 }});
 
-define({id: "57f9f53c", inputs: ["Plot","monthlyFtsData","monthlyBlogPageviewsData"], outputs: ["monthlyFtsPlot","monthlyBlogPageviewsPlot"], body: (Plot,monthlyFtsData,monthlyBlogPageviewsData) => {
+define({id: "51a48963", inputs: ["Plot","monthlyFtsData","monthlyBlogPageviewsData","blogAssistedSignupsData"], outputs: ["monthlyFtsPlot","monthlyBlogPageviewsPlot","blogAssistedSignupsPlot"], body: (Plot,monthlyFtsData,monthlyBlogPageviewsData,blogAssistedSignupsData) => {
 function monthlyFtsPlot(width) {
   return Plot.plot({
     title: "Monthly First-Time Sessions (Last 13 Months)",
@@ -265,7 +305,46 @@ function monthlyBlogPageviewsPlot(width) {
     marginLeft: 60
   });
 }
-return {monthlyFtsPlot,monthlyBlogPageviewsPlot};
+
+function blogAssistedSignupsPlot(width) {
+  return Plot.plot({
+    title: "Monthly Blog Assisted Signups (Last 13 Months)",
+    y: {
+      grid: true,
+      label: "Sessions"
+    },
+    x: {
+      label: "Month",
+      tickRotate: 45
+    },
+    marks: [
+      Plot.line(blogAssistedSignupsData, {
+        x: "month",
+        y: "sessions",
+        stroke: "darkgreen",
+        strokeWidth: 3,
+        curve: "natural"
+      }),
+      Plot.dot(blogAssistedSignupsData, {
+        x: "month",
+        y: "sessions",
+        fill: "darkgreen",
+        r: 3,
+        tip: {
+          format: {
+            x: d => new Date(d).toLocaleDateString(),
+            y: d => d.toLocaleString()
+          }
+        }
+      })
+    ],
+    width: width || 1200,
+    height: 400,
+    marginBottom: 70,
+    marginLeft: 60
+  });
+}
+return {monthlyFtsPlot,monthlyBlogPageviewsPlot,blogAssistedSignupsPlot};
 }});
 
 define({id: "937dc307", mode: "inline", inputs: ["resize","monthlyFtsPlot","display"], body: async (resize,monthlyFtsPlot,display) => {
@@ -280,15 +359,26 @@ resize(width => monthlyBlogPageviewsPlot(width))
 ))
 }});
 
-define({id: "930236c0", inputs: ["FileAttachment"], outputs: ["signupsBySource"], body: (FileAttachment) => {
-// Load signups by source data
-const signupsBySource = FileAttachment("./data/signups_by_source.csv").csv({typed: true});
-return {signupsBySource};
+define({id: "71c5125a", mode: "inline", inputs: ["resize","blogAssistedSignupsPlot","display"], body: async (resize,blogAssistedSignupsPlot,display) => {
+display(await(
+resize(width => blogAssistedSignupsPlot(width))
+))
 }});
 
-define({id: "95fee4d5", inputs: ["signupsBySource","Plot"], outputs: ["weeklySignupsByReferrerPlot"], body: (signupsBySource,Plot) => {
-// Create a function to generate the weekly signups by referrer plot
-function weeklySignupsByReferrerPlot(width) {
+define({id: "63eb665f", inputs: ["FileAttachment"], outputs: ["signupsBySourceRaw","signupsBySource"], body: async (FileAttachment) => {
+// Load signups by source data
+const signupsBySourceRaw = await FileAttachment("./data/signups_by_source.csv").csv();
+const signupsBySource = signupsBySourceRaw.map(d => ({
+  month: new Date(d.month + "T00:00:00"), // Parse as local date to avoid timezone shift
+  referrer: d.referrer,
+  signups: +d.signups
+}));
+return {signupsBySourceRaw,signupsBySource};
+}});
+
+define({id: "4ce9d53e", inputs: ["signupsBySource","Plot","bufferChannelPerformance","html"], outputs: ["monthlySignupsByReferrerPlot","bufferChannelPerformanceTable"], body: (signupsBySource,Plot,bufferChannelPerformance,html) => {
+// Create a function to generate the monthly signups by referrer plot
+function monthlySignupsByReferrerPlot(width) {
   // List of referrers
   const referrers = [
     "organic_search", "buffer", "direct", "paid_search", "llm",
@@ -333,20 +423,20 @@ function weeklySignupsByReferrerPlot(width) {
     const filtered = signupsBySource.filter(d => selected.includes(d.referrer));
 
     const plot = Plot.plot({
-      title: `Weekly Signups by Referrer Source (Last 52 Weeks)`,
+      title: `Monthly Signups by Referrer Source (Last 13 Months)`,
       y: { grid: true, label: "Signups" },
-      x: { label: "Week", tickRotate: 45 },
+      x: { label: "Month", tickRotate: 45 },
       color: { legend: true },
       marks: [
         Plot.line(filtered, {
-          x: "week",
+          x: "month",
           y: "signups",
           stroke: "referrer",
           strokeWidth: 2,
           curve: "natural"
         }),
         Plot.dot(filtered, {
-          x: "week",
+          x: "month",
           y: "signups",
           stroke: "referrer",
           fill: "referrer",
@@ -370,12 +460,164 @@ function weeklySignupsByReferrerPlot(width) {
 
   return container;
 }
-return {weeklySignupsByReferrerPlot};
+
+function bufferChannelPerformanceTable() {
+  // Sort state
+  let sortColumn = 'likes'; // Default sort by likes
+  let sortDirection = 'desc'; // Default to descending
+  
+  // Calculate totals
+  const totals = bufferChannelPerformance.reduce((acc, d) => ({
+    posts: acc.posts + (d.posts || 0),
+    likes: acc.likes + (d.likes || 0),
+    reposts: acc.reposts + (d.reposts || 0),
+    comments_and_replies: acc.comments_and_replies + (d.comments_and_replies || 0),
+    reach: acc.reach + (d.reach || 0),
+    impressions: acc.impressions + (d.impressions || 0),
+    views: acc.views + (d.views || 0)
+  }), {
+    posts: 0,
+    likes: 0,
+    reposts: 0,
+    comments_and_replies: 0,
+    reach: 0,
+    impressions: 0,
+    views: 0
+  });
+
+  // Sort function
+  function sortData(data, column, direction) {
+    return [...data].sort((a, b) => {
+      let aVal, bVal;
+      
+      if (column === 'name' || column === 'service') {
+        aVal = (a[column] || '').toLowerCase();
+        bVal = (b[column] || '').toLowerCase();
+      } else {
+        aVal = a[column] || 0;
+        bVal = b[column] || 0;
+      }
+      
+      if (direction === 'asc') {
+        return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
+      } else {
+        return aVal < bVal ? 1 : aVal > bVal ? -1 : 0;
+      }
+    });
+  }
+
+  // Create container div
+  const container = document.createElement("div");
+  container.className = "engagement-table";
+
+  function render() {
+    const sortedData = sortData(bufferChannelPerformance, sortColumn, sortDirection);
+    
+    const getSortIcon = (column) => {
+      if (sortColumn !== column) return '↕️';
+      return sortDirection === 'asc' ? '↑' : '↓';
+    };
+
+    container.innerHTML = '';
+    const table = html`
+      <table>
+        <thead>
+          <tr>
+            <th class="team-member-header sortable" data-column="name">
+              Channel ${getSortIcon('name')}
+            </th>
+            <th class="metric-header sortable" data-column="service">
+              Service ${getSortIcon('service')}
+            </th>
+            <th class="metric-header sortable" data-column="posts">
+              Posts ${getSortIcon('posts')}
+            </th>
+            <th class="metric-header sortable" data-column="likes">
+              Likes ${getSortIcon('likes')}
+            </th>
+            <th class="metric-header sortable" data-column="reposts">
+              Reposts ${getSortIcon('reposts')}
+            </th>
+            <th class="metric-header sortable" data-column="comments_and_replies">
+              Comments & Replies ${getSortIcon('comments_and_replies')}
+            </th>
+            <th class="metric-header sortable" data-column="reach">
+              Reach ${getSortIcon('reach')}
+            </th>
+            <th class="metric-header sortable" data-column="impressions">
+              Impressions ${getSortIcon('impressions')}
+            </th>
+            <th class="metric-header sortable" data-column="views">
+              Views ${getSortIcon('views')}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          ${sortedData.map(d => html`
+            <tr>
+              <td class="team-member">
+                ${d.avatar ? html`<img src="${d.avatar}" alt="${d.name}" class="avatar">` : html`<div class="avatar-placeholder">${d.name ? d.name.charAt(0).toUpperCase() : '?'}</div>`}
+                <span class="name">${d.name}</span>
+              </td>
+              <td class="metric-cell">${d.service}</td>
+              <td class="metric-cell">${d.posts.toLocaleString()}</td>
+              <td class="metric-cell">${d.likes.toLocaleString()}</td>
+              <td class="metric-cell">${d.reposts.toLocaleString()}</td>
+              <td class="metric-cell">${d.comments_and_replies.toLocaleString()}</td>
+              <td class="metric-cell">${d.reach.toLocaleString()}</td>
+              <td class="metric-cell">${d.impressions.toLocaleString()}</td>
+              <td class="metric-cell">${d.views.toLocaleString()}</td>
+            </tr>
+          `)}
+        </tbody>
+        <tfoot>
+          <tr class="totals-row">
+            <td class="team-member"><strong>TOTALS</strong></td>
+            <td class="metric-cell"><strong>All Channels</strong></td>
+            <td class="metric-cell"><strong>${totals.posts.toLocaleString()}</strong></td>
+            <td class="metric-cell"><strong>${totals.likes.toLocaleString()}</strong></td>
+            <td class="metric-cell"><strong>${totals.reposts.toLocaleString()}</strong></td>
+            <td class="metric-cell"><strong>${totals.comments_and_replies.toLocaleString()}</strong></td>
+            <td class="metric-cell"><strong>${totals.reach.toLocaleString()}</strong></td>
+            <td class="metric-cell"><strong>${totals.impressions.toLocaleString()}</strong></td>
+            <td class="metric-cell"><strong>${totals.views.toLocaleString()}</strong></td>
+          </tr>
+        </tfoot>
+      </table>
+    `;
+    
+    container.appendChild(table);
+    
+    // Add click handlers to sortable headers
+    container.querySelectorAll('.sortable').forEach(header => {
+      header.addEventListener('click', () => {
+        const column = header.dataset.column;
+        if (sortColumn === column) {
+          sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+          sortColumn = column;
+          sortDirection = (column === 'name' || column === 'service') ? 'asc' : 'desc'; // Default to asc for text, desc for numbers
+        }
+        render();
+      });
+    });
+  }
+  
+  render();
+  return container;
+}
+return {monthlySignupsByReferrerPlot,bufferChannelPerformanceTable};
 }});
 
-define({id: "922ac523", mode: "inline", inputs: ["resize","weeklySignupsByReferrerPlot","display"], body: async (resize,weeklySignupsByReferrerPlot,display) => {
+define({id: "e012a075", mode: "inline", inputs: ["resize","monthlySignupsByReferrerPlot","display"], body: async (resize,monthlySignupsByReferrerPlot,display) => {
 display(await(
-resize(width => weeklySignupsByReferrerPlot(width))
+resize(width => monthlySignupsByReferrerPlot(width))
+))
+}});
+
+define({id: "0937a173", mode: "inline", inputs: ["bufferChannelPerformanceTable","display"], body: async (bufferChannelPerformanceTable,display) => {
+display(await(
+bufferChannelPerformanceTable()
 ))
 }});
 
@@ -409,7 +651,7 @@ resize(width => weeklySignupsByReferrerPlot(width))
 <div style="margin: 20px 0; padding: 12px; background-color: #f8f9fa; border-left: 4px solid #007bff; font-size: 14px; color: #666;">
   <strong>Data current as of:</strong> <observablehq-loading></observablehq-loading><!--:667ff6cf:-->
 </div>
-<div class="observablehq observablehq--block"><!--:57442a1d:--></div>
+<div class="observablehq observablehq--block"><!--:00e463f5:--></div>
 <div class="observablehq observablehq--block"><!--:7955b02f:--></div>
 <div class="grid grid-cols-3">
   <a class="card" style="color: inherit;">
@@ -431,21 +673,157 @@ resize(width => weeklySignupsByReferrerPlot(width))
       <observablehq-loading></observablehq-loading><!--:2b530188:--> <observablehq-loading></observablehq-loading><!--:d4f84b33:-->% from last month</span>
   </a>
 </div>
-<div class="observablehq observablehq--block"><!--:57f9f53c:--></div>
+<div class="observablehq observablehq--block"><!--:51a48963:--></div>
 <h2 id="monthly-trends" tabindex="-1"><a class="observablehq-header-anchor" href="#monthly-trends">Monthly Trends</a></h2>
-<div class="grid grid-cols-2">
+<div class="grid grid-cols-3">
   <div class="card"><observablehq-loading></observablehq-loading><!--:937dc307:--></div>
   <div class="card"><observablehq-loading></observablehq-loading><!--:97992a0d:--></div>
+  <div class="card"><observablehq-loading></observablehq-loading><!--:71c5125a:--></div>
 </div>
-<div class="observablehq observablehq--block"><!--:930236c0:--></div>
+<div class="observablehq observablehq--block"><!--:63eb665f:--></div>
 <h2 id="signups-by-attribution-source" tabindex="-1"><a class="observablehq-header-anchor" href="#signups-by-attribution-source">Signups by Attribution Source</a></h2>
-<div class="observablehq observablehq--block"><!--:95fee4d5:--></div>
+<div class="observablehq observablehq--block"><!--:4ce9d53e:--></div>
 <div class="grid">
-  <div class="card"><observablehq-loading></observablehq-loading><!--:922ac523:--></div>
+  <div class="card"><observablehq-loading></observablehq-loading><!--:e012a075:--></div>
+</div>
+<h2 id="buffer-channel-monthly-performance" tabindex="-1"><a class="observablehq-header-anchor" href="#buffer-channel-monthly-performance">Buffer Channel Monthly Performance</a></h2>
+<style>
+.engagement-table {
+  margin: 1rem 0;
+  border-radius: 8px;
+  overflow-x: auto;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.engagement-table table {
+  width: 100%;
+  min-width: 1075px;
+  border-collapse: collapse;
+  background-color: white;
+  margin: 0;
+  table-layout: fixed;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e9ecef;
+  flex-shrink: 0;
+}
+
+.avatar-placeholder {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #6c757d;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  border: 2px solid #e9ecef;
+  flex-shrink: 0;
+}
+
+.team-member {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  width: 200px !important;
+  min-width: 200px !important;
+  max-width: 200px !important;
+}
+
+.team-member-header {
+  text-align: left;
+  width: 200px !important;
+  min-width: 200px !important;
+  max-width: 200px !important;
+}
+
+.name {
+  font-weight: 500;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.metric-cell {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  width: 125px !important;
+  min-width: 125px !important;
+  max-width: 125px !important;
+  white-space: nowrap;
+}
+
+.metric-header {
+  text-align: right;
+  width: 125px !important;
+  min-width: 125px !important;
+  max-width: 125px !important;
+}
+
+.engagement-table .metric-header,
+.engagement-table .metric-cell {
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+}
+
+.engagement-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.engagement-table th.sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease;
+}
+
+.engagement-table th.sortable:hover {
+  background-color: #e9ecef;
+}
+
+.engagement-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.engagement-table th,
+.engagement-table td {
+  padding: 12px 8px;
+  border-bottom: 1px solid #ddd;
+  vertical-align: middle;
+  box-sizing: border-box;
+}
+
+.totals-row {
+  background-color: #f8f9fa !important;
+  border-top: 2px solid #dee2e6 !important;
+}
+
+.totals-row td {
+  border-bottom: none !important;
+  padding-top: 16px !important;
+  padding-bottom: 16px !important;
+  font-weight: bold;
+}
+</style>
+<div class="grid">
+  <div class="card" style="overflow-x: auto;">
+    <observablehq-loading></observablehq-loading><!--:0937a173:-->
+  </div>
 </div>
 </main>
 <footer id="observablehq-footer">
-<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2025-06-26T13:37:07">Jun 26, 2025</a>.</div>
+<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2025-08-27T16:22:15">Aug 27, 2025</a>.</div>
 </footer>
 </div>
 </body>

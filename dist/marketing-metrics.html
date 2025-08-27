@@ -69,11 +69,11 @@
 import {define} from "./_observablehq/client.4ba413f8.js";
 import {registerFile} from "./_observablehq/stdlib.ec062f48.js";
 
-registerFile("./data/buffer_team_monthly_engagement.csv", {"name":"./data/buffer_team_monthly_engagement.csv","mimeType":"text/csv","path":"./_file/data/buffer_team_monthly_engagement.92c3526f.csv","lastModified":1750857425766,"size":8158});
-registerFile("./data/buffer_team_posts.csv", {"name":"./data/buffer_team_posts.csv","mimeType":"text/csv","path":"./_file/data/buffer_team_posts.16f3b51f.csv","lastModified":1750857425766,"size":2105});
-registerFile("./data/buffer_team_weekly_active_members.csv", {"name":"./data/buffer_team_weekly_active_members.csv","mimeType":"text/csv","path":"./_file/data/buffer_team_weekly_active_members.f710232d.csv","lastModified":1750857425767,"size":1452});
-registerFile("./data/buffer_team_weekly_median_posts.csv", {"name":"./data/buffer_team_weekly_median_posts.csv","mimeType":"text/csv","path":"./_file/data/buffer_team_weekly_median_posts.888d3468.csv","lastModified":1750857425767,"size":1405});
-registerFile("./data/last_query_timestamp.json", {"name":"./data/last_query_timestamp.json","mimeType":"application/json","path":"./_file/data/last_query_timestamp.89c7e47b.json","lastModified":1750958715453,"size":43});
+registerFile("./data/buffer_team_monthly_engagement.csv", {"name":"./data/buffer_team_monthly_engagement.csv","mimeType":"text/csv","path":"./_file/data/buffer_team_monthly_engagement.fc442f34.csv","lastModified":1756326053291,"size":8662});
+registerFile("./data/buffer_team_posts.csv", {"name":"./data/buffer_team_posts.csv","mimeType":"text/csv","path":"./_file/data/buffer_team_posts.d570d923.csv","lastModified":1756326049655,"size":1843});
+registerFile("./data/buffer_team_weekly_active_members.csv", {"name":"./data/buffer_team_weekly_active_members.csv","mimeType":"text/csv","path":"./_file/data/buffer_team_weekly_active_members.c5ff7810.csv","lastModified":1756326049656,"size":1452});
+registerFile("./data/buffer_team_weekly_median_posts.csv", {"name":"./data/buffer_team_weekly_median_posts.csv","mimeType":"text/csv","path":"./_file/data/buffer_team_weekly_median_posts.329c0219.csv","lastModified":1756326049657,"size":1405});
+registerFile("./data/last_query_timestamp.json", {"name":"./data/last_query_timestamp.json","mimeType":"application/json","path":"./_file/data/last_query_timestamp.9de25ed0.json","lastModified":1756326060196,"size":43});
 
 define({id: "fdb5422b", inputs: ["FileAttachment"], outputs: ["lastQueryTimestamp","lastRunDate"], body: async (FileAttachment) => {
 const lastQueryTimestamp = await FileAttachment("./data/last_query_timestamp.json").json();
@@ -94,8 +94,8 @@ lastRunDate
 ))
 }});
 
-define({id: "2c2ad928", inputs: ["FileAttachment"], outputs: ["bufferTeamPosts","bufferTeamMonthlyEngagement","bufferTeamWeeklyActiveMembers","bufferTeamWeeklyMedianPosts"], body: (FileAttachment) => {
-// Load data from CSV files
+define({id: "61e92350", inputs: ["FileAttachment"], outputs: ["bufferTeamPosts","bufferTeamMonthlyEngagement","bufferTeamWeeklyActiveMembers","bufferTeamWeeklyMedianPosts"], body: (FileAttachment) => {
+// Load data from CSV files - using consolidated query data
 const bufferTeamPosts = FileAttachment("./data/buffer_team_posts.csv").csv({typed: true});
 const bufferTeamMonthlyEngagement = FileAttachment("./data/buffer_team_monthly_engagement.csv").csv({typed: true});
 const bufferTeamWeeklyActiveMembers = FileAttachment("./data/buffer_team_weekly_active_members.csv").csv({typed: true});
@@ -450,7 +450,7 @@ return {bufferTeamEngagementTable};
 <div style="margin: 20px 0; padding: 12px; background-color: #f8f9fa; border-left: 4px solid #007bff; font-size: 14px; color: #666;">
   <strong>Data current as of:</strong> <observablehq-loading></observablehq-loading><!--:667ff6cf:-->
 </div>
-<div class="observablehq observablehq--block"><!--:2c2ad928:--></div>
+<div class="observablehq observablehq--block"><!--:61e92350:--></div>
 <div class="observablehq observablehq--block"><!--:0ab9f339:--></div>
 <div class="observablehq observablehq--block"><!--:cc5b05af:--></div>
 <div class="observablehq observablehq--block"><!--:05154de6:--></div>
@@ -651,7 +651,7 @@ return {bufferTeamEngagementTable};
 }
 </style></main>
 <footer id="observablehq-footer">
-<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2025-06-26T13:37:07">Jun 26, 2025</a>.</div>
+<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2025-08-27T16:22:15">Aug 27, 2025</a>.</div>
 </footer>
 </div>
 </body>
