@@ -45,6 +45,7 @@ select
     , a.name
     , a.organization_id
     , a.current_streak
+    , date_trunc(date(up.sent_at), month) as month
     , count(distinct up.id) as posts
     , coalesce(sum(up.likes), 0) + coalesce(sum(up.reactions), 0) + coalesce(sum(up.favorites), 0)  as likes
     , safe_add(ifnull(sum(up.reposts), 0), ifnull(sum(up.retweets), 0)) as reposts
@@ -55,7 +56,7 @@ select
 from admins as a
 left join dbt_buffer.publish_updates as up
     on a.organization_id = up.organization_id
-    and date_trunc(date(up.sent_at), month) = date_trunc(current_date(), month)
-group by 1,2,3,4
-order by 5 desc
+    and up.sent_at >= '2025-01-01'
+group by 1,2,3,4,5
+order by 6 desc
 `;

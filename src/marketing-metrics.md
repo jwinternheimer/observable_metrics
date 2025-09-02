@@ -23,7 +23,20 @@ const lastRunDate = new Date(lastQueryTimestamp.lastRun).toLocaleString('en-US',
 ```js
 // Load data from CSV files - using consolidated query data
 const bufferTeamPosts = FileAttachment("data/buffer_team_posts.csv").csv({typed: true});
-const bufferTeamMonthlyEngagement = FileAttachment("data/buffer_team_monthly_engagement.csv").csv({typed: true});
+const bufferTeamMonthlyEngagementRaw = await FileAttachment("data/buffer_team_monthly_engagement.csv").csv();
+// Normalize types and parse month
+const bufferTeamMonthlyEngagement = bufferTeamMonthlyEngagementRaw.map(d => ({
+  ...d,
+  month: new Date(d.month + "T00:00:00"),
+  current_streak: +d.current_streak,
+  posts: +d.posts,
+  likes: +d.likes,
+  reposts: +d.reposts,
+  comments_and_replies: +d.comments_and_replies,
+  reach: +d.reach,
+  impressions: +d.impressions,
+  views: +d.views
+}));
 const bufferTeamWeeklyActiveMembers = FileAttachment("data/buffer_team_weekly_active_members.csv").csv({typed: true});
 const bufferTeamWeeklyMedianPosts = FileAttachment("data/buffer_team_weekly_median_posts.csv").csv({typed: true});
 ```
@@ -173,9 +186,54 @@ const currentMonth = monthNames[currentDate.getMonth()];
 const currentYear = currentDate.getFullYear();
 ```
 
-<div class="section-header">
-  <h2>Buffer Team Monthly Engagement - ${currentMonth} ${currentYear}</h2>
-</div>
+```js
+// Helpers
+function monthLabel(dt) {
+  return dt.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+}
+function buildUniqueMonths(rows) {
+  return Array.from(new Set(rows.map(d => d.month.getTime())))
+    .sort((a, b) => b - a)
+    .map(ts => new Date(ts));
+}
+function sortData(data, column, direction, textKey) {
+  return [...data].sort((a, b) => {
+    let aVal, bVal;
+    if (column === textKey) {
+      aVal = (a[textKey] || '').toLowerCase();
+      bVal = (b[textKey] || '').toLowerCase();
+    } else {
+      aVal = a[column] || 0;
+      bVal = b[column] || 0;
+    }
+    if (direction === 'asc') return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
+    return aVal < bVal ? 1 : aVal > bVal ? -1 : 0;
+  });
+}
+function getSortIconFactory(currentColumnRef, currentDirectionRef) {
+  return (column) => currentColumnRef.value !== column ? '↕️' : (currentDirectionRef.value === 'asc' ? '↑' : '↓');
+}
+
+// Month selector (since 2025-01)
+const uniqueMonths = buildUniqueMonths(bufferTeamMonthlyEngagement);
+const defaultMonthTs = new Date(new Date().getFullYear(), new Date().getMonth(), 1).getTime();
+const initialSelectedMonthTs = uniqueMonths.find(m => m.getTime() === defaultMonthTs)?.getTime() ?? uniqueMonths[0]?.getTime();
+const monthSelect = document.createElement('select');
+monthSelect.setAttribute('aria-label', 'Month');
+monthSelect.style.margin = '8px 0 16px 0';
+uniqueMonths.forEach(m => {
+  const opt = document.createElement('option');
+  opt.value = String(m.getTime());
+  opt.textContent = monthLabel(m);
+  if (m.getTime() === initialSelectedMonthTs) opt.selected = true;
+  monthSelect.appendChild(opt);
+});
+display(html`<div class="section-header">
+  <h2>Buffer Team Monthly Engagement</h2>
+  <label style="display:block; font-weight:600; margin-bottom:4px;">Select Month</label>
+  <div>${monthSelect}</div>
+</div>`);
+```
 
 ```js
 function bufferTeamEngagementTable() {
@@ -183,65 +241,41 @@ function bufferTeamEngagementTable() {
   let sortColumn = 'likes'; // Default sort by likes
   let sortDirection = 'desc'; // Default to descending
   
-  // Calculate totals
-  const totals = bufferTeamMonthlyEngagement.reduce((acc, d) => ({
-    posts: acc.posts + (d.posts || 0),
-    likes: acc.likes + (d.likes || 0),
-    reposts: acc.reposts + (d.reposts || 0),
-    comments_and_replies: acc.comments_and_replies + (d.comments_and_replies || 0),
-    reach: acc.reach + (d.reach || 0),
-    impressions: acc.impressions + (d.impressions || 0),
-    views: acc.views + (d.views || 0),
-    current_streak_sum: acc.current_streak_sum + (d.current_streak || 0),
-    count: acc.count + 1
-  }), {
-    posts: 0,
-    likes: 0,
-    reposts: 0,
-    comments_and_replies: 0,
-    reach: 0,
-    impressions: 0,
-    views: 0,
-    current_streak_sum: 0,
-    count: 0
-  });
-  
-  // Calculate average streak for totals row
-  totals.current_streak_avg = totals.count > 0 ? Math.round(totals.current_streak_sum / totals.count) : 0;
-
-  // Sort function
-  function sortData(data, column, direction) {
-    return [...data].sort((a, b) => {
-      let aVal, bVal;
-      
-      if (column === 'name') {
-        aVal = (a.name || '').toLowerCase();
-        bVal = (b.name || '').toLowerCase();
-      } else {
-        aVal = a[column] || 0;
-        bVal = b[column] || 0;
-      }
-      
-      if (direction === 'asc') {
-        return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
-      } else {
-        return aVal < bVal ? 1 : aVal > bVal ? -1 : 0;
-      }
-    });
-  }
+  const sortState = { column: sortColumn, direction: sortDirection };
+  const getSortIcon = getSortIconFactory({ value: sortColumn }, { value: sortDirection });
 
   // Create container div
   const container = document.createElement("div");
   container.className = "engagement-table";
 
   function render() {
-    const sortedData = sortData(bufferTeamMonthlyEngagement, sortColumn, sortDirection);
+    const selectedMonthTs = Number(monthSelect.value);
+    const monthFiltered = bufferTeamMonthlyEngagement.filter(d => d.month.getTime() === selectedMonthTs);
+    // Calculate totals for the selected month
+    const totals = monthFiltered.reduce((acc, d) => ({
+      posts: acc.posts + (d.posts || 0),
+      likes: acc.likes + (d.likes || 0),
+      reposts: acc.reposts + (d.reposts || 0),
+      comments_and_replies: acc.comments_and_replies + (d.comments_and_replies || 0),
+      reach: acc.reach + (d.reach || 0),
+      impressions: acc.impressions + (d.impressions || 0),
+      views: acc.views + (d.views || 0),
+      current_streak_sum: acc.current_streak_sum + (d.current_streak || 0),
+      count: acc.count + 1
+    }), {
+      posts: 0,
+      likes: 0,
+      reposts: 0,
+      comments_and_replies: 0,
+      reach: 0,
+      impressions: 0,
+      views: 0,
+      current_streak_sum: 0,
+      count: 0
+    });
+    totals.current_streak_avg = totals.count > 0 ? Math.round(totals.current_streak_sum / totals.count) : 0;
+    const sortedData = sortData(monthFiltered, sortColumn, sortDirection, 'name');
     
-    const getSortIcon = (column) => {
-      if (sortColumn !== column) return '↕️';
-      return sortDirection === 'asc' ? '↑' : '↓';
-    };
-
     container.innerHTML = '';
     const table = html`
       <table>
@@ -322,12 +356,17 @@ function bufferTeamEngagementTable() {
           sortColumn = column;
           sortDirection = column === 'name' ? 'asc' : 'desc'; // Default to asc for names, desc for numbers
         }
+        sortState.column = sortColumn;
+        sortState.direction = sortDirection;
         render();
       });
     });
   }
   
   render();
+  monthSelect.addEventListener('change', () => {
+    render();
+  });
   return container;
 }
 
@@ -338,6 +377,7 @@ display(bufferTeamEngagementTable());
 // Load org team mapping and compute team-level aggregates
 const orgTeamsRaw = await FileAttachment("data/org_teams.csv").csv();
 const orgIdToTeam = new Map(orgTeamsRaw.map(d => [String(d.organization_id), d.team]));
+const allTeams = Array.from(new Set(orgTeamsRaw.map(d => d.team))).filter(Boolean);
 
 function acronymFromTeam(team) {
   if (!team) return "?";
@@ -349,95 +389,98 @@ function acronymFromTeam(team) {
     .toUpperCase();
 }
 
-// Precompute aggregated metrics by team
-const engagementByTeamMap = bufferTeamMonthlyEngagement.reduce((acc, d) => {
-  const team = orgIdToTeam.get(String(d.organization_id)) || "Unknown";
-  const key = team;
-  if (!acc.has(key)) {
-    acc.set(key, {
-      team,
-      current_streak_sum: 0,
-      member_count: 0,
+// Precompute aggregated metrics by team per month
+function computeEngagementByTeamForMonth(monthTs) {
+  const engagementByTeamMap = bufferTeamMonthlyEngagement
+    .filter(d => d.month.getTime() === monthTs)
+    .reduce((acc, d) => {
+      const team = orgIdToTeam.get(String(d.organization_id)) || "Unknown";
+      const key = team;
+      if (!acc.has(key)) {
+        acc.set(key, {
+          team,
+          current_streak_sum: 0,
+          member_count: 0,
+          posts: 0,
+          likes: 0,
+          reposts: 0,
+          comments_and_replies: 0,
+          reach: 0,
+          impressions: 0,
+          views: 0
+        });
+      }
+      const t = acc.get(key);
+      t.current_streak_sum += d.current_streak || 0;
+      t.member_count += 1;
+      t.posts += d.posts || 0;
+      t.likes += d.likes || 0;
+      t.reposts += d.reposts || 0;
+      t.comments_and_replies += d.comments_and_replies || 0;
+      t.reach += d.reach || 0;
+      t.impressions += d.impressions || 0;
+      t.views += d.views || 0;
+      return acc;
+    }, new Map());
+  // Ensure all known teams are present even if zero activity
+  for (const team of allTeams) {
+    if (!engagementByTeamMap.has(team)) {
+      engagementByTeamMap.set(team, {
+        team,
+        current_streak_sum: 0,
+        member_count: 0,
+        posts: 0,
+        likes: 0,
+        reposts: 0,
+        comments_and_replies: 0,
+        reach: 0,
+        impressions: 0,
+        views: 0
+      });
+    }
+  }
+  return Array.from(engagementByTeamMap.values()).map(d => ({
+    ...d,
+    current_streak_avg: d.member_count > 0 ? Math.round(d.current_streak_sum / d.member_count) : 0
+  }));
+}
+
+function bufferTeamEngagementByTeamTable() {
+  // Sort state
+  let sortColumn = 'likes';
+  let sortDirection = 'desc';
+  const sortState = { column: sortColumn, direction: sortDirection };
+  const getSortIcon = getSortIconFactory({ value: sortColumn }, { value: sortDirection });
+
+  const container = document.createElement('div');
+  container.className = 'engagement-table';
+
+  function render() {
+    const selectedMonthTs = Number(monthSelect.value);
+    const engagementByTeam = computeEngagementByTeamForMonth(selectedMonthTs);
+    const sortedData = sortData(engagementByTeam, sortColumn, sortDirection, 'team');
+    const totals = engagementByTeam.reduce((acc, d) => ({
+      posts: acc.posts + (d.posts || 0),
+      likes: acc.likes + (d.likes || 0),
+      reposts: acc.reposts + (d.reposts || 0),
+      comments_and_replies: acc.comments_and_replies + (d.comments_and_replies || 0),
+      reach: acc.reach + (d.reach || 0),
+      impressions: acc.impressions + (d.impressions || 0),
+      views: acc.views + (d.views || 0),
+      streak_sum: acc.streak_sum + (d.current_streak_sum || 0),
+      member_count: acc.member_count + (d.member_count || 0)
+    }), {
       posts: 0,
       likes: 0,
       reposts: 0,
       comments_and_replies: 0,
       reach: 0,
       impressions: 0,
-      views: 0
+      views: 0,
+      streak_sum: 0,
+      member_count: 0
     });
-  }
-  const t = acc.get(key);
-  t.current_streak_sum += d.current_streak || 0;
-  t.member_count += 1;
-  t.posts += d.posts || 0;
-  t.likes += d.likes || 0;
-  t.reposts += d.reposts || 0;
-  t.comments_and_replies += d.comments_and_replies || 0;
-  t.reach += d.reach || 0;
-  t.impressions += d.impressions || 0;
-  t.views += d.views || 0;
-  return acc;
-}, new Map());
-
-const engagementByTeam = Array.from(engagementByTeamMap.values()).map(d => ({
-  ...d,
-  current_streak_avg: d.member_count > 0 ? Math.round(d.current_streak_sum / d.member_count) : 0
-}));
-
-function bufferTeamEngagementByTeamTable() {
-  // Sort state
-  let sortColumn = 'likes';
-  let sortDirection = 'desc';
-
-  // Totals
-  const totals = engagementByTeam.reduce((acc, d) => ({
-    posts: acc.posts + (d.posts || 0),
-    likes: acc.likes + (d.likes || 0),
-    reposts: acc.reposts + (d.reposts || 0),
-    comments_and_replies: acc.comments_and_replies + (d.comments_and_replies || 0),
-    reach: acc.reach + (d.reach || 0),
-    impressions: acc.impressions + (d.impressions || 0),
-    views: acc.views + (d.views || 0),
-    streak_sum: acc.streak_sum + (d.current_streak_sum || 0),
-    member_count: acc.member_count + (d.member_count || 0)
-  }), {
-    posts: 0,
-    likes: 0,
-    reposts: 0,
-    comments_and_replies: 0,
-    reach: 0,
-    impressions: 0,
-    views: 0,
-    streak_sum: 0,
-    member_count: 0
-  });
-  totals.current_streak_avg = totals.member_count > 0 ? Math.round(totals.streak_sum / totals.member_count) : 0;
-
-  function sortData(data, column, direction) {
-    return [...data].sort((a, b) => {
-      let aVal, bVal;
-      if (column === 'team') {
-        aVal = (a.team || '').toLowerCase();
-        bVal = (b.team || '').toLowerCase();
-      } else {
-        aVal = a[column] || 0;
-        bVal = b[column] || 0;
-      }
-      if (direction === 'asc') return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
-      return aVal < bVal ? 1 : aVal > bVal ? -1 : 0;
-    });
-  }
-
-  const container = document.createElement('div');
-  container.className = 'engagement-table';
-
-  function render() {
-    const sortedData = sortData(engagementByTeam, sortColumn, sortDirection);
-    const getSortIcon = (column) => {
-      if (sortColumn !== column) return '↕️';
-      return sortDirection === 'asc' ? '↑' : '↓';
-    };
+    totals.current_streak_avg = totals.member_count > 0 ? Math.round(totals.streak_sum / totals.member_count) : 0;
 
     container.innerHTML = '';
     const table = html`
@@ -518,12 +561,17 @@ function bufferTeamEngagementByTeamTable() {
           sortColumn = column;
           sortDirection = column === 'team' ? 'asc' : 'desc';
         }
+        sortState.column = sortColumn;
+        sortState.direction = sortDirection;
         render();
       });
     });
   }
 
   render();
+  monthSelect.addEventListener('change', () => {
+    render();
+  });
   return container;
 }
 ```
@@ -531,8 +579,11 @@ function bufferTeamEngagementByTeamTable() {
 <div class="section-header">
   <h2>Team Engagement by Team - ${currentMonth} ${currentYear}</h2>
   <p>Aggregated from Buffer Team Monthly Engagement</p>
-  ${bufferTeamEngagementByTeamTable()}
 </div>
+
+```js
+display(bufferTeamEngagementByTeamTable());
+```
 
 <style>
 .grid {

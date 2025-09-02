@@ -69,12 +69,12 @@
 import {define} from "./_observablehq/client.4ba413f8.js";
 import {registerFile} from "./_observablehq/stdlib.ec062f48.js";
 
-registerFile("./data/buffer_team_monthly_engagement.csv", {"name":"./data/buffer_team_monthly_engagement.csv","mimeType":"text/csv","path":"./_file/data/buffer_team_monthly_engagement.32ba3b56.csv","lastModified":1756829133832,"size":10617});
-registerFile("./data/buffer_team_posts.csv", {"name":"./data/buffer_team_posts.csv","mimeType":"text/csv","path":"./_file/data/buffer_team_posts.909d7d11.csv","lastModified":1756829129357,"size":1844});
-registerFile("./data/buffer_team_weekly_active_members.csv", {"name":"./data/buffer_team_weekly_active_members.csv","mimeType":"text/csv","path":"./_file/data/buffer_team_weekly_active_members.d45969dd.csv","lastModified":1756829129358,"size":1452});
-registerFile("./data/buffer_team_weekly_median_posts.csv", {"name":"./data/buffer_team_weekly_median_posts.csv","mimeType":"text/csv","path":"./_file/data/buffer_team_weekly_median_posts.a4a67707.csv","lastModified":1756829129358,"size":1405});
-registerFile("./data/last_query_timestamp.json", {"name":"./data/last_query_timestamp.json","mimeType":"application/json","path":"./_file/data/last_query_timestamp.956cb1ea.json","lastModified":1756829142641,"size":43});
-registerFile("./data/org_teams.csv", {"name":"./data/org_teams.csv","mimeType":"text/csv","path":"./_file/data/org_teams.6fb34cf1.csv","lastModified":1756827704454,"size":2610});
+registerFile("./data/buffer_team_monthly_engagement.csv", {"name":"./data/buffer_team_monthly_engagement.csv","mimeType":"text/csv","path":"./_file/data/buffer_team_monthly_engagement.3a51425c.csv","lastModified":1756835302341,"size":88066});
+registerFile("./data/buffer_team_posts.csv", {"name":"./data/buffer_team_posts.csv","mimeType":"text/csv","path":"./_file/data/buffer_team_posts.36e8241b.csv","lastModified":1756835298356,"size":1844});
+registerFile("./data/buffer_team_weekly_active_members.csv", {"name":"./data/buffer_team_weekly_active_members.csv","mimeType":"text/csv","path":"./_file/data/buffer_team_weekly_active_members.b822818a.csv","lastModified":1756835298356,"size":1452});
+registerFile("./data/buffer_team_weekly_median_posts.csv", {"name":"./data/buffer_team_weekly_median_posts.csv","mimeType":"text/csv","path":"./_file/data/buffer_team_weekly_median_posts.d48e692c.csv","lastModified":1756835298357,"size":1405});
+registerFile("./data/last_query_timestamp.json", {"name":"./data/last_query_timestamp.json","mimeType":"application/json","path":"./_file/data/last_query_timestamp.95a212df.json","lastModified":1756835308987,"size":43});
+registerFile("./data/org_teams.csv", {"name":"./data/org_teams.csv","mimeType":"text/csv","path":"./_file/data/org_teams.886b9edb.csv","lastModified":1756841463480,"size":2610});
 
 define({id: "fdb5422b", inputs: ["FileAttachment"], outputs: ["lastQueryTimestamp","lastRunDate"], body: async (FileAttachment) => {
 const lastQueryTimestamp = await FileAttachment("./data/last_query_timestamp.json").json();
@@ -95,13 +95,26 @@ lastRunDate
 ))
 }});
 
-define({id: "61e92350", inputs: ["FileAttachment"], outputs: ["bufferTeamPosts","bufferTeamMonthlyEngagement","bufferTeamWeeklyActiveMembers","bufferTeamWeeklyMedianPosts"], body: (FileAttachment) => {
+define({id: "e0d8e018", inputs: ["FileAttachment"], outputs: ["bufferTeamPosts","bufferTeamMonthlyEngagementRaw","bufferTeamMonthlyEngagement","bufferTeamWeeklyActiveMembers","bufferTeamWeeklyMedianPosts"], body: async (FileAttachment) => {
 // Load data from CSV files - using consolidated query data
 const bufferTeamPosts = FileAttachment("./data/buffer_team_posts.csv").csv({typed: true});
-const bufferTeamMonthlyEngagement = FileAttachment("./data/buffer_team_monthly_engagement.csv").csv({typed: true});
+const bufferTeamMonthlyEngagementRaw = await FileAttachment("./data/buffer_team_monthly_engagement.csv").csv();
+// Normalize types and parse month
+const bufferTeamMonthlyEngagement = bufferTeamMonthlyEngagementRaw.map(d => ({
+  ...d,
+  month: new Date(d.month + "T00:00:00"),
+  current_streak: +d.current_streak,
+  posts: +d.posts,
+  likes: +d.likes,
+  reposts: +d.reposts,
+  comments_and_replies: +d.comments_and_replies,
+  reach: +d.reach,
+  impressions: +d.impressions,
+  views: +d.views
+}));
 const bufferTeamWeeklyActiveMembers = FileAttachment("./data/buffer_team_weekly_active_members.csv").csv({typed: true});
 const bufferTeamWeeklyMedianPosts = FileAttachment("./data/buffer_team_weekly_median_posts.csv").csv({typed: true});
-return {bufferTeamPosts,bufferTeamMonthlyEngagement,bufferTeamWeeklyActiveMembers,bufferTeamWeeklyMedianPosts};
+return {bufferTeamPosts,bufferTeamMonthlyEngagementRaw,bufferTeamMonthlyEngagement,bufferTeamWeeklyActiveMembers,bufferTeamWeeklyMedianPosts};
 }});
 
 define({id: "0ab9f339", inputs: ["Plot","bufferTeamWeeklyActiveMembers","bufferTeamPosts","bufferTeamWeeklyMedianPosts"], outputs: ["activeTeamMembersPlot","totalTeamPostsPlot","medianPostsPerMemberPlot","totalTeamReachPlot"], body: (Plot,bufferTeamWeeklyActiveMembers,bufferTeamPosts,bufferTeamWeeklyMedianPosts) => {
@@ -251,83 +264,97 @@ const currentYear = currentDate.getFullYear();
 return {currentDate,monthNames,currentMonth,currentYear};
 }});
 
-define({id: "67fbe648", mode: "inline", inputs: ["currentMonth","display"], body: async (currentMonth,display) => {
-display(await(
-currentMonth
-))
+define({id: "8391c0c3", inputs: ["bufferTeamMonthlyEngagement","display","html"], outputs: ["monthLabel","buildUniqueMonths","sortData","getSortIconFactory","uniqueMonths","defaultMonthTs","initialSelectedMonthTs","monthSelect"], body: (bufferTeamMonthlyEngagement,display,html) => {
+// Helpers
+function monthLabel(dt) {
+  return dt.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+}
+function buildUniqueMonths(rows) {
+  return Array.from(new Set(rows.map(d => d.month.getTime())))
+    .sort((a, b) => b - a)
+    .map(ts => new Date(ts));
+}
+function sortData(data, column, direction, textKey) {
+  return [...data].sort((a, b) => {
+    let aVal, bVal;
+    if (column === textKey) {
+      aVal = (a[textKey] || '').toLowerCase();
+      bVal = (b[textKey] || '').toLowerCase();
+    } else {
+      aVal = a[column] || 0;
+      bVal = b[column] || 0;
+    }
+    if (direction === 'asc') return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
+    return aVal < bVal ? 1 : aVal > bVal ? -1 : 0;
+  });
+}
+function getSortIconFactory(currentColumnRef, currentDirectionRef) {
+  return (column) => currentColumnRef.value !== column ? '↕️' : (currentDirectionRef.value === 'asc' ? '↑' : '↓');
+}
+
+// Month selector (since 2025-01)
+const uniqueMonths = buildUniqueMonths(bufferTeamMonthlyEngagement);
+const defaultMonthTs = new Date(new Date().getFullYear(), new Date().getMonth(), 1).getTime();
+const initialSelectedMonthTs = uniqueMonths.find(m => m.getTime() === defaultMonthTs)?.getTime() ?? uniqueMonths[0]?.getTime();
+const monthSelect = document.createElement('select');
+monthSelect.setAttribute('aria-label', 'Month');
+monthSelect.style.margin = '8px 0 16px 0';
+uniqueMonths.forEach(m => {
+  const opt = document.createElement('option');
+  opt.value = String(m.getTime());
+  opt.textContent = monthLabel(m);
+  if (m.getTime() === initialSelectedMonthTs) opt.selected = true;
+  monthSelect.appendChild(opt);
+});
+display(html`<div class="section-header">
+  <h2>Buffer Team Monthly Engagement</h2>
+  <label style="display:block; font-weight:600; margin-bottom:4px;">Select Month</label>
+  <div>${monthSelect}</div>
+</div>`);
+return {monthLabel,buildUniqueMonths,sortData,getSortIconFactory,uniqueMonths,defaultMonthTs,initialSelectedMonthTs,monthSelect};
 }});
 
-define({id: "48c2bfa9", mode: "inline", inputs: ["currentYear","display"], body: async (currentYear,display) => {
-display(await(
-currentYear
-))
-}});
-
-define({id: "4bfbaac8", inputs: ["bufferTeamMonthlyEngagement","html","display"], outputs: ["bufferTeamEngagementTable"], body: (bufferTeamMonthlyEngagement,html,display) => {
+define({id: "6e1642b5", inputs: ["getSortIconFactory","monthSelect","bufferTeamMonthlyEngagement","sortData","html","display"], outputs: ["bufferTeamEngagementTable"], body: (getSortIconFactory,monthSelect,bufferTeamMonthlyEngagement,sortData,html,display) => {
 function bufferTeamEngagementTable() {
   // Sort state
   let sortColumn = 'likes'; // Default sort by likes
   let sortDirection = 'desc'; // Default to descending
   
-  // Calculate totals
-  const totals = bufferTeamMonthlyEngagement.reduce((acc, d) => ({
-    posts: acc.posts + (d.posts || 0),
-    likes: acc.likes + (d.likes || 0),
-    reposts: acc.reposts + (d.reposts || 0),
-    comments_and_replies: acc.comments_and_replies + (d.comments_and_replies || 0),
-    reach: acc.reach + (d.reach || 0),
-    impressions: acc.impressions + (d.impressions || 0),
-    views: acc.views + (d.views || 0),
-    current_streak_sum: acc.current_streak_sum + (d.current_streak || 0),
-    count: acc.count + 1
-  }), {
-    posts: 0,
-    likes: 0,
-    reposts: 0,
-    comments_and_replies: 0,
-    reach: 0,
-    impressions: 0,
-    views: 0,
-    current_streak_sum: 0,
-    count: 0
-  });
-  
-  // Calculate average streak for totals row
-  totals.current_streak_avg = totals.count > 0 ? Math.round(totals.current_streak_sum / totals.count) : 0;
-
-  // Sort function
-  function sortData(data, column, direction) {
-    return [...data].sort((a, b) => {
-      let aVal, bVal;
-      
-      if (column === 'name') {
-        aVal = (a.name || '').toLowerCase();
-        bVal = (b.name || '').toLowerCase();
-      } else {
-        aVal = a[column] || 0;
-        bVal = b[column] || 0;
-      }
-      
-      if (direction === 'asc') {
-        return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
-      } else {
-        return aVal < bVal ? 1 : aVal > bVal ? -1 : 0;
-      }
-    });
-  }
+  const sortState = { column: sortColumn, direction: sortDirection };
+  const getSortIcon = getSortIconFactory({ value: sortColumn }, { value: sortDirection });
 
   // Create container div
   const container = document.createElement("div");
   container.className = "engagement-table";
 
   function render() {
-    const sortedData = sortData(bufferTeamMonthlyEngagement, sortColumn, sortDirection);
+    const selectedMonthTs = Number(monthSelect.value);
+    const monthFiltered = bufferTeamMonthlyEngagement.filter(d => d.month.getTime() === selectedMonthTs);
+    // Calculate totals for the selected month
+    const totals = monthFiltered.reduce((acc, d) => ({
+      posts: acc.posts + (d.posts || 0),
+      likes: acc.likes + (d.likes || 0),
+      reposts: acc.reposts + (d.reposts || 0),
+      comments_and_replies: acc.comments_and_replies + (d.comments_and_replies || 0),
+      reach: acc.reach + (d.reach || 0),
+      impressions: acc.impressions + (d.impressions || 0),
+      views: acc.views + (d.views || 0),
+      current_streak_sum: acc.current_streak_sum + (d.current_streak || 0),
+      count: acc.count + 1
+    }), {
+      posts: 0,
+      likes: 0,
+      reposts: 0,
+      comments_and_replies: 0,
+      reach: 0,
+      impressions: 0,
+      views: 0,
+      current_streak_sum: 0,
+      count: 0
+    });
+    totals.current_streak_avg = totals.count > 0 ? Math.round(totals.current_streak_sum / totals.count) : 0;
+    const sortedData = sortData(monthFiltered, sortColumn, sortDirection, 'name');
     
-    const getSortIcon = (column) => {
-      if (sortColumn !== column) return '↕️';
-      return sortDirection === 'asc' ? '↑' : '↓';
-    };
-
     container.innerHTML = '';
     const table = html`
       <table>
@@ -408,12 +435,17 @@ function bufferTeamEngagementTable() {
           sortColumn = column;
           sortDirection = column === 'name' ? 'asc' : 'desc'; // Default to asc for names, desc for numbers
         }
+        sortState.column = sortColumn;
+        sortState.direction = sortDirection;
         render();
       });
     });
   }
   
   render();
+  monthSelect.addEventListener('change', () => {
+    render();
+  });
   return container;
 }
 
@@ -421,10 +453,11 @@ display(bufferTeamEngagementTable());
 return {bufferTeamEngagementTable};
 }});
 
-define({id: "c6e489b0", inputs: ["FileAttachment","bufferTeamMonthlyEngagement","html"], outputs: ["orgTeamsRaw","orgIdToTeam","acronymFromTeam","engagementByTeamMap","engagementByTeam","bufferTeamEngagementByTeamTable"], body: async (FileAttachment,bufferTeamMonthlyEngagement,html) => {
+define({id: "9e8f2429", inputs: ["FileAttachment","bufferTeamMonthlyEngagement","getSortIconFactory","monthSelect","sortData","html"], outputs: ["orgTeamsRaw","orgIdToTeam","allTeams","acronymFromTeam","computeEngagementByTeamForMonth","bufferTeamEngagementByTeamTable"], body: async (FileAttachment,bufferTeamMonthlyEngagement,getSortIconFactory,monthSelect,sortData,html) => {
 // Load org team mapping and compute team-level aggregates
 const orgTeamsRaw = await FileAttachment("./data/org_teams.csv").csv();
 const orgIdToTeam = new Map(orgTeamsRaw.map(d => [String(d.organization_id), d.team]));
+const allTeams = Array.from(new Set(orgTeamsRaw.map(d => d.team))).filter(Boolean);
 
 function acronymFromTeam(team) {
   if (!team) return "?";
@@ -436,95 +469,98 @@ function acronymFromTeam(team) {
     .toUpperCase();
 }
 
-// Precompute aggregated metrics by team
-const engagementByTeamMap = bufferTeamMonthlyEngagement.reduce((acc, d) => {
-  const team = orgIdToTeam.get(String(d.organization_id)) || "Unknown";
-  const key = team;
-  if (!acc.has(key)) {
-    acc.set(key, {
-      team,
-      current_streak_sum: 0,
-      member_count: 0,
+// Precompute aggregated metrics by team per month
+function computeEngagementByTeamForMonth(monthTs) {
+  const engagementByTeamMap = bufferTeamMonthlyEngagement
+    .filter(d => d.month.getTime() === monthTs)
+    .reduce((acc, d) => {
+      const team = orgIdToTeam.get(String(d.organization_id)) || "Unknown";
+      const key = team;
+      if (!acc.has(key)) {
+        acc.set(key, {
+          team,
+          current_streak_sum: 0,
+          member_count: 0,
+          posts: 0,
+          likes: 0,
+          reposts: 0,
+          comments_and_replies: 0,
+          reach: 0,
+          impressions: 0,
+          views: 0
+        });
+      }
+      const t = acc.get(key);
+      t.current_streak_sum += d.current_streak || 0;
+      t.member_count += 1;
+      t.posts += d.posts || 0;
+      t.likes += d.likes || 0;
+      t.reposts += d.reposts || 0;
+      t.comments_and_replies += d.comments_and_replies || 0;
+      t.reach += d.reach || 0;
+      t.impressions += d.impressions || 0;
+      t.views += d.views || 0;
+      return acc;
+    }, new Map());
+  // Ensure all known teams are present even if zero activity
+  for (const team of allTeams) {
+    if (!engagementByTeamMap.has(team)) {
+      engagementByTeamMap.set(team, {
+        team,
+        current_streak_sum: 0,
+        member_count: 0,
+        posts: 0,
+        likes: 0,
+        reposts: 0,
+        comments_and_replies: 0,
+        reach: 0,
+        impressions: 0,
+        views: 0
+      });
+    }
+  }
+  return Array.from(engagementByTeamMap.values()).map(d => ({
+    ...d,
+    current_streak_avg: d.member_count > 0 ? Math.round(d.current_streak_sum / d.member_count) : 0
+  }));
+}
+
+function bufferTeamEngagementByTeamTable() {
+  // Sort state
+  let sortColumn = 'likes';
+  let sortDirection = 'desc';
+  const sortState = { column: sortColumn, direction: sortDirection };
+  const getSortIcon = getSortIconFactory({ value: sortColumn }, { value: sortDirection });
+
+  const container = document.createElement('div');
+  container.className = 'engagement-table';
+
+  function render() {
+    const selectedMonthTs = Number(monthSelect.value);
+    const engagementByTeam = computeEngagementByTeamForMonth(selectedMonthTs);
+    const sortedData = sortData(engagementByTeam, sortColumn, sortDirection, 'team');
+    const totals = engagementByTeam.reduce((acc, d) => ({
+      posts: acc.posts + (d.posts || 0),
+      likes: acc.likes + (d.likes || 0),
+      reposts: acc.reposts + (d.reposts || 0),
+      comments_and_replies: acc.comments_and_replies + (d.comments_and_replies || 0),
+      reach: acc.reach + (d.reach || 0),
+      impressions: acc.impressions + (d.impressions || 0),
+      views: acc.views + (d.views || 0),
+      streak_sum: acc.streak_sum + (d.current_streak_sum || 0),
+      member_count: acc.member_count + (d.member_count || 0)
+    }), {
       posts: 0,
       likes: 0,
       reposts: 0,
       comments_and_replies: 0,
       reach: 0,
       impressions: 0,
-      views: 0
+      views: 0,
+      streak_sum: 0,
+      member_count: 0
     });
-  }
-  const t = acc.get(key);
-  t.current_streak_sum += d.current_streak || 0;
-  t.member_count += 1;
-  t.posts += d.posts || 0;
-  t.likes += d.likes || 0;
-  t.reposts += d.reposts || 0;
-  t.comments_and_replies += d.comments_and_replies || 0;
-  t.reach += d.reach || 0;
-  t.impressions += d.impressions || 0;
-  t.views += d.views || 0;
-  return acc;
-}, new Map());
-
-const engagementByTeam = Array.from(engagementByTeamMap.values()).map(d => ({
-  ...d,
-  current_streak_avg: d.member_count > 0 ? Math.round(d.current_streak_sum / d.member_count) : 0
-}));
-
-function bufferTeamEngagementByTeamTable() {
-  // Sort state
-  let sortColumn = 'likes';
-  let sortDirection = 'desc';
-
-  // Totals
-  const totals = engagementByTeam.reduce((acc, d) => ({
-    posts: acc.posts + (d.posts || 0),
-    likes: acc.likes + (d.likes || 0),
-    reposts: acc.reposts + (d.reposts || 0),
-    comments_and_replies: acc.comments_and_replies + (d.comments_and_replies || 0),
-    reach: acc.reach + (d.reach || 0),
-    impressions: acc.impressions + (d.impressions || 0),
-    views: acc.views + (d.views || 0),
-    streak_sum: acc.streak_sum + (d.current_streak_sum || 0),
-    member_count: acc.member_count + (d.member_count || 0)
-  }), {
-    posts: 0,
-    likes: 0,
-    reposts: 0,
-    comments_and_replies: 0,
-    reach: 0,
-    impressions: 0,
-    views: 0,
-    streak_sum: 0,
-    member_count: 0
-  });
-  totals.current_streak_avg = totals.member_count > 0 ? Math.round(totals.streak_sum / totals.member_count) : 0;
-
-  function sortData(data, column, direction) {
-    return [...data].sort((a, b) => {
-      let aVal, bVal;
-      if (column === 'team') {
-        aVal = (a.team || '').toLowerCase();
-        bVal = (b.team || '').toLowerCase();
-      } else {
-        aVal = a[column] || 0;
-        bVal = b[column] || 0;
-      }
-      if (direction === 'asc') return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
-      return aVal < bVal ? 1 : aVal > bVal ? -1 : 0;
-    });
-  }
-
-  const container = document.createElement('div');
-  container.className = 'engagement-table';
-
-  function render() {
-    const sortedData = sortData(engagementByTeam, sortColumn, sortDirection);
-    const getSortIcon = (column) => {
-      if (sortColumn !== column) return '↕️';
-      return sortDirection === 'asc' ? '↑' : '↓';
-    };
+    totals.current_streak_avg = totals.member_count > 0 ? Math.round(totals.streak_sum / totals.member_count) : 0;
 
     container.innerHTML = '';
     const table = html`
@@ -605,33 +641,36 @@ function bufferTeamEngagementByTeamTable() {
           sortColumn = column;
           sortDirection = column === 'team' ? 'asc' : 'desc';
         }
+        sortState.column = sortColumn;
+        sortState.direction = sortDirection;
         render();
       });
     });
   }
 
   render();
+  monthSelect.addEventListener('change', () => {
+    render();
+  });
   return container;
 }
-return {orgTeamsRaw,orgIdToTeam,acronymFromTeam,engagementByTeamMap,engagementByTeam,bufferTeamEngagementByTeamTable};
+return {orgTeamsRaw,orgIdToTeam,allTeams,acronymFromTeam,computeEngagementByTeamForMonth,bufferTeamEngagementByTeamTable};
 }});
 
-define({id: "67fbe648-1", mode: "inline", inputs: ["currentMonth","display"], body: async (currentMonth,display) => {
+define({id: "67fbe648", mode: "inline", inputs: ["currentMonth","display"], body: async (currentMonth,display) => {
 display(await(
 currentMonth
 ))
 }});
 
-define({id: "48c2bfa9-1", mode: "inline", inputs: ["currentYear","display"], body: async (currentYear,display) => {
+define({id: "48c2bfa9", mode: "inline", inputs: ["currentYear","display"], body: async (currentYear,display) => {
 display(await(
 currentYear
 ))
 }});
 
-define({id: "5b46a762", mode: "inline", inputs: ["bufferTeamEngagementByTeamTable","display"], body: async (bufferTeamEngagementByTeamTable,display) => {
-display(await(
-bufferTeamEngagementByTeamTable()
-))
+define({id: "daffb80d", inputs: ["display","bufferTeamEngagementByTeamTable"], body: (display,bufferTeamEngagementByTeamTable) => {
+display(bufferTeamEngagementByTeamTable());
 }});
 
 </script>
@@ -664,20 +703,18 @@ bufferTeamEngagementByTeamTable()
 <div style="margin: 20px 0; padding: 12px; background-color: #f8f9fa; border-left: 4px solid #007bff; font-size: 14px; color: #666;">
   <strong>Data current as of:</strong> <observablehq-loading></observablehq-loading><!--:667ff6cf:-->
 </div>
-<div class="observablehq observablehq--block"><!--:61e92350:--></div>
+<div class="observablehq observablehq--block"><!--:e0d8e018:--></div>
 <div class="observablehq observablehq--block"><!--:0ab9f339:--></div>
 <div class="observablehq observablehq--block"><!--:cc5b05af:--></div>
 <div class="observablehq observablehq--block"><!--:05154de6:--></div>
+<div class="observablehq observablehq--block"><!--:8391c0c3:--></div>
+<div class="observablehq observablehq--block"><!--:6e1642b5:--></div>
+<div class="observablehq observablehq--block"><!--:9e8f2429:--></div>
 <div class="section-header">
-  <h2>Buffer Team Monthly Engagement - <observablehq-loading></observablehq-loading><!--:67fbe648:--> <observablehq-loading></observablehq-loading><!--:48c2bfa9:--></h2>
-</div>
-<div class="observablehq observablehq--block"><!--:4bfbaac8:--></div>
-<div class="observablehq observablehq--block"><!--:c6e489b0:--></div>
-<div class="section-header">
-  <h2>Team Engagement by Team - <observablehq-loading></observablehq-loading><!--:67fbe648-1:--> <observablehq-loading></observablehq-loading><!--:48c2bfa9-1:--></h2>
+  <h2>Team Engagement by Team - <observablehq-loading></observablehq-loading><!--:67fbe648:--> <observablehq-loading></observablehq-loading><!--:48c2bfa9:--></h2>
   <p>Aggregated from Buffer Team Monthly Engagement</p>
-  <observablehq-loading></observablehq-loading><!--:5b46a762:-->
 </div>
+<div class="observablehq observablehq--block"><!--:daffb80d:--></div>
 <style>
 .grid {
   display: grid;
@@ -871,7 +908,7 @@ bufferTeamEngagementByTeamTable()
 }
 </style></main>
 <footer id="observablehq-footer">
-<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2025-09-02T12:10:02">Sep 2, 2025</a>.</div>
+<div>Built with <a href="https://observablehq.com/" target="_blank" rel="noopener noreferrer">Observable</a> on <a title="2025-09-02T15:31:51">Sep 2, 2025</a>.</div>
 </footer>
 </div>
 </body>

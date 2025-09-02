@@ -287,7 +287,23 @@ async function executeQueries() {
     console.log("Running buffer team monthly engagement query...");
     const bufferTeamMonthlyEngagementRows = await runQuery(bufferTeamMonthlyEngagementSql);
     
-    const csvBufferTeamMonthlyEngagement = csvFormat(bufferTeamMonthlyEngagementRows);
+    // Ensure month is formatted as YYYY-MM-DD
+    const formattedBufferTeamMonthlyEngagementRows = bufferTeamMonthlyEngagementRows.map(row => {
+      if (row.month instanceof Date) {
+        return {
+          ...row,
+          month: row.month.toISOString().split('T')[0]
+        };
+      } else if (row.month && typeof row.month === 'object') {
+        return {
+          ...row,
+          month: String(row.month.value || JSON.stringify(row.month))
+        };
+      }
+      return row;
+    });
+
+    const csvBufferTeamMonthlyEngagement = csvFormat(formattedBufferTeamMonthlyEngagementRows);
     fs.writeFileSync(`${targetDir}/buffer_team_monthly_engagement.csv`, csvBufferTeamMonthlyEngagement);
     console.log(`Buffer team monthly engagement query complete, saved ${bufferTeamMonthlyEngagementRows.length} rows`);
     
