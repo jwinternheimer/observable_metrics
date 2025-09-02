@@ -334,6 +334,206 @@ function bufferTeamEngagementTable() {
 display(bufferTeamEngagementTable());
 ```
 
+```js
+// Load org team mapping and compute team-level aggregates
+const orgTeamsRaw = await FileAttachment("data/org_teams.csv").csv();
+const orgIdToTeam = new Map(orgTeamsRaw.map(d => [String(d.organization_id), d.team]));
+
+function acronymFromTeam(team) {
+  if (!team) return "?";
+  return team
+    .split(/\s+/)
+    .filter(Boolean)
+    .map(w => w[0])
+    .join("")
+    .toUpperCase();
+}
+
+// Precompute aggregated metrics by team
+const engagementByTeamMap = bufferTeamMonthlyEngagement.reduce((acc, d) => {
+  const team = orgIdToTeam.get(String(d.organization_id)) || "Unknown";
+  const key = team;
+  if (!acc.has(key)) {
+    acc.set(key, {
+      team,
+      current_streak_sum: 0,
+      member_count: 0,
+      posts: 0,
+      likes: 0,
+      reposts: 0,
+      comments_and_replies: 0,
+      reach: 0,
+      impressions: 0,
+      views: 0
+    });
+  }
+  const t = acc.get(key);
+  t.current_streak_sum += d.current_streak || 0;
+  t.member_count += 1;
+  t.posts += d.posts || 0;
+  t.likes += d.likes || 0;
+  t.reposts += d.reposts || 0;
+  t.comments_and_replies += d.comments_and_replies || 0;
+  t.reach += d.reach || 0;
+  t.impressions += d.impressions || 0;
+  t.views += d.views || 0;
+  return acc;
+}, new Map());
+
+const engagementByTeam = Array.from(engagementByTeamMap.values()).map(d => ({
+  ...d,
+  current_streak_avg: d.member_count > 0 ? Math.round(d.current_streak_sum / d.member_count) : 0
+}));
+
+function bufferTeamEngagementByTeamTable() {
+  // Sort state
+  let sortColumn = 'likes';
+  let sortDirection = 'desc';
+
+  // Totals
+  const totals = engagementByTeam.reduce((acc, d) => ({
+    posts: acc.posts + (d.posts || 0),
+    likes: acc.likes + (d.likes || 0),
+    reposts: acc.reposts + (d.reposts || 0),
+    comments_and_replies: acc.comments_and_replies + (d.comments_and_replies || 0),
+    reach: acc.reach + (d.reach || 0),
+    impressions: acc.impressions + (d.impressions || 0),
+    views: acc.views + (d.views || 0),
+    streak_sum: acc.streak_sum + (d.current_streak_sum || 0),
+    member_count: acc.member_count + (d.member_count || 0)
+  }), {
+    posts: 0,
+    likes: 0,
+    reposts: 0,
+    comments_and_replies: 0,
+    reach: 0,
+    impressions: 0,
+    views: 0,
+    streak_sum: 0,
+    member_count: 0
+  });
+  totals.current_streak_avg = totals.member_count > 0 ? Math.round(totals.streak_sum / totals.member_count) : 0;
+
+  function sortData(data, column, direction) {
+    return [...data].sort((a, b) => {
+      let aVal, bVal;
+      if (column === 'team') {
+        aVal = (a.team || '').toLowerCase();
+        bVal = (b.team || '').toLowerCase();
+      } else {
+        aVal = a[column] || 0;
+        bVal = b[column] || 0;
+      }
+      if (direction === 'asc') return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
+      return aVal < bVal ? 1 : aVal > bVal ? -1 : 0;
+    });
+  }
+
+  const container = document.createElement('div');
+  container.className = 'engagement-table';
+
+  function render() {
+    const sortedData = sortData(engagementByTeam, sortColumn, sortDirection);
+    const getSortIcon = (column) => {
+      if (sortColumn !== column) return '↕️';
+      return sortDirection === 'asc' ? '↑' : '↓';
+    };
+
+    container.innerHTML = '';
+    const table = html`
+      <table>
+        <thead>
+          <tr>
+            <th class="team-member-header sortable" data-column="team">
+              Team ${getSortIcon('team')}
+            </th>
+            <th class="metric-header sortable" data-column="current_streak_avg">
+              Avg Streak ${getSortIcon('current_streak_avg')}
+            </th>
+            <th class="metric-header sortable" data-column="posts">
+              Posts ${getSortIcon('posts')}
+            </th>
+            <th class="metric-header sortable" data-column="likes">
+              Likes ${getSortIcon('likes')}
+            </th>
+            <th class="metric-header sortable" data-column="reposts">
+              Reposts ${getSortIcon('reposts')}
+            </th>
+            <th class="metric-header sortable" data-column="comments_and_replies">
+              Comments & Replies ${getSortIcon('comments_and_replies')}
+            </th>
+            <th class="metric-header sortable" data-column="reach">
+              Reach ${getSortIcon('reach')}
+            </th>
+            <th class="metric-header sortable" data-column="impressions">
+              Impressions ${getSortIcon('impressions')}
+            </th>
+            <th class="metric-header sortable" data-column="views">
+              Views ${getSortIcon('views')}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          ${sortedData.map(d => html`
+            <tr>
+              <td class="team-member">
+                <div class="avatar-placeholder">${acronymFromTeam(d.team)}</div>
+                <span class="name">${d.team}</span>
+              </td>
+              <td class="metric-cell">${d.current_streak_avg.toLocaleString()}</td>
+              <td class="metric-cell">${d.posts.toLocaleString()}</td>
+              <td class="metric-cell">${d.likes.toLocaleString()}</td>
+              <td class="metric-cell">${d.reposts.toLocaleString()}</td>
+              <td class="metric-cell">${d.comments_and_replies.toLocaleString()}</td>
+              <td class="metric-cell">${d.reach.toLocaleString()}</td>
+              <td class="metric-cell">${d.impressions.toLocaleString()}</td>
+              <td class="metric-cell">${d.views.toLocaleString()}</td>
+            </tr>
+          `)}
+        </tbody>
+        <tfoot>
+          <tr class="totals-row">
+            <td class="team-member"><strong>TOTALS</strong></td>
+            <td class="metric-cell"><strong>${totals.current_streak_avg} (avg)</strong></td>
+            <td class="metric-cell"><strong>${totals.posts.toLocaleString()}</strong></td>
+            <td class="metric-cell"><strong>${totals.likes.toLocaleString()}</strong></td>
+            <td class="metric-cell"><strong>${totals.reposts.toLocaleString()}</strong></td>
+            <td class="metric-cell"><strong>${totals.comments_and_replies.toLocaleString()}</strong></td>
+            <td class="metric-cell"><strong>${totals.reach.toLocaleString()}</strong></td>
+            <td class="metric-cell"><strong>${totals.impressions.toLocaleString()}</strong></td>
+            <td class="metric-cell"><strong>${totals.views.toLocaleString()}</strong></td>
+          </tr>
+        </tfoot>
+      </table>
+    `;
+
+    container.appendChild(table);
+
+    container.querySelectorAll('.sortable').forEach(header => {
+      header.addEventListener('click', () => {
+        const column = header.dataset.column;
+        if (sortColumn === column) {
+          sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+          sortColumn = column;
+          sortDirection = column === 'team' ? 'asc' : 'desc';
+        }
+        render();
+      });
+    });
+  }
+
+  render();
+  return container;
+}
+```
+
+<div class="section-header">
+  <h2>Team Engagement by Team - ${currentMonth} ${currentYear}</h2>
+  <p>Aggregated from Buffer Team Monthly Engagement</p>
+  ${bufferTeamEngagementByTeamTable()}
+</div>
+
 <style>
 .grid {
   display: grid;

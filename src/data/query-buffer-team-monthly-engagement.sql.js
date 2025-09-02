@@ -16,8 +16,8 @@ with admins as (
           '592752f4dcab3cf176c607d4', '60b8a79a0677fa7577082ada', '57b45291fe35a08103841504',
           '61b5880de5e21457abd03eb7', '645912daf924a7c53bf40cfc', '63c9ad57d39b920d1fb2ca5b',
           '63c7d702964c23a6e58d45fb', '593187638dcc95a84c934dcf', '6021472eec321181f3dc4e83',
-          '61024c4289704e3b246ece7b', '5de69f6b4024296e096b48f5', '57dafcb6b49f3ac46a9d3345',
-          '5877921a046bf37835f96b63', '65f202817ffd5edab02270a7', '5cac340ed0640d38942a45b4',
+          '61024c4289704e3b246ece7b', '57dafcb6b49f3ac46a9d3345',
+          '5877921a046bf37835f96b63', '65f202817ffd5edab02270a7',
           '5c38de5f32812a37285dd44a', '60487d143605300f6d8ecd58', '58fd860b7f1d34710553c771',
           '6365436d828433d6f72afc5c', '57a4b626124ba1253bf0f2d6', '580a3526699556f51907e18a',
           '581cce58b8e9d6ad5a7b5b92', '57e1309a9cf964d17d8b456c', '613a06db997ec0e21e03c5d0',
@@ -43,6 +43,7 @@ with admins as (
 select
     a.avatar
     , a.name
+    , a.organization_id
     , a.current_streak
     , count(distinct up.id) as posts
     , coalesce(sum(up.likes), 0) + coalesce(sum(up.reactions), 0) + coalesce(sum(up.favorites), 0)  as likes
@@ -52,9 +53,9 @@ select
     , sum(ifnull(up.impressions, 0)) as impressions
     , sum(ifnull(up.views, 0)) as views
 from admins as a
-inner join dbt_buffer.publish_updates as up
+left join dbt_buffer.publish_updates as up
     on a.organization_id = up.organization_id
     and date_trunc(date(up.sent_at), month) = date_trunc(current_date(), month)
-group by 1,2,3
+group by 1,2,3,4
 order by 5 desc
 `;
