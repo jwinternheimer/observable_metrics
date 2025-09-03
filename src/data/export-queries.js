@@ -14,6 +14,8 @@ import bufferTeamMonthlyEngagementSql from "./query-buffer-team-monthly-engageme
 import monthlyBlogPageviewsSql from "./query-monthly-blog-pageviews.sql.js";
 import blogAssistedSignupsSql from "./query-blog-assisted-signups.sql.js";
 import bufferChannelMonthlyPerformanceSql from "./query-buffer-channel-monthly-performance.sql.js";
+import weeklyBlogPageviewsSql from "./query-weekly-blog-pageviews.sql.js";
+import bufferChannelsWeeklyReachSql from "./query-buffer-channels-weekly-reach.sql.js";
 
 // Ensure target directory exists
 const targetDir = "./src/data";
@@ -299,12 +301,12 @@ async function executeQueries() {
     });
     
     // Generate buffer_team_posts.csv (original metrics)
-    const bufferTeamPostsRows = formattedBufferTeamConsolidatedRows.map(row => ({
+    const bufferTeamPostsDerivedRows = formattedBufferTeamConsolidatedRows.map(row => ({
       week: row.week,
       posts: row.total_posts,
       total_reach: row.total_reach
     }));
-    const csvBufferTeamPosts = csvFormat(bufferTeamPostsRows);
+    const csvBufferTeamPosts = csvFormat(bufferTeamPostsDerivedRows);
     fs.writeFileSync(`${targetDir}/buffer_team_posts.csv`, csvBufferTeamPosts);
     
     // Generate buffer_team_weekly_active_members.csv
@@ -408,6 +410,71 @@ async function executeQueries() {
     fs.writeFileSync(`${targetDir}/buffer-channel-monthly-performance.csv`, csvBufferChannelMonthlyPerformance);
     console.log(`Buffer channel monthly performance query complete, saved ${bufferChannelMonthlyPerformanceRows.length} rows`);
     
+    // Query 12: Weekly Blog Pageviews
+    console.log("Running weekly blog pageviews query...");
+    const weeklyBlogPageviewsRows = await runQuery(weeklyBlogPageviewsSql);
+    const weeklyBlogPageviewsFormatted = weeklyBlogPageviewsRows.map(row => {
+      let week;
+      if (row.week instanceof Date) {
+        week = row.week.toISOString().split('T')[0];
+      } else if (row.week && typeof row.week === 'object') {
+        week = String(row.week.value || JSON.stringify(row.week));
+      } else {
+        week = String(row.week);
+      }
+      return { week, blog_pageviews: +row.blog_pageviews || 0 };
+    });
+    const csvWeeklyBlogPageviews = csvFormat(weeklyBlogPageviewsFormatted);
+    fs.writeFileSync(`${targetDir}/weekly_blog_pageviews.csv`, csvWeeklyBlogPageviews);
+    console.log(`Weekly blog pageviews query complete, saved ${weeklyBlogPageviewsRows.length} rows`);
+
+    // Query 13: Buffer Channels Weekly Reach
+    console.log("Running buffer channels weekly reach query...");
+    const bufferChannelsWeeklyReachRows = await runQuery(bufferChannelsWeeklyReachSql);
+    const bufferChannelsWeeklyReachFormatted = bufferChannelsWeeklyReachRows.map(row => {
+      let week;
+      if (row.week instanceof Date) {
+        week = row.week.toISOString().split('T')[0];
+      } else if (row.week && typeof row.week === 'object') {
+        week = String(row.week.value || JSON.stringify(row.week));
+      } else {
+        week = String(row.week);
+      }
+      return { week, total_reach: +row.total_reach || 0, posts: +row.posts || 0 };
+    });
+    const csvBufferChannelsWeeklyReach = csvFormat(bufferChannelsWeeklyReachFormatted);
+    fs.writeFileSync(`${targetDir}/buffer_channels_weekly_reach.csv`, csvBufferChannelsWeeklyReach);
+    console.log(`Buffer channels weekly reach query complete, saved ${bufferChannelsWeeklyReachRows.length} rows`);
+
+    // Union brand weekly reach: blog, buffer channels, buffer team
+    console.log("Building brand weekly reach union file...");
+    const bufferTeamPostsCsv = fs.readFileSync(`${targetDir}/buffer_team_posts.csv`, 'utf8');
+    const bufferTeamPostsRowsParsed = csvParse(bufferTeamPostsCsv);
+    const blogWeeklyCsv = fs.readFileSync(`${targetDir}/weekly_blog_pageviews.csv`, 'utf8');
+    const blogWeeklyRows = csvParse(blogWeeklyCsv);
+    const channelsWeeklyCsv = fs.readFileSync(`${targetDir}/buffer_channels_weekly_reach.csv`, 'utf8');
+    const channelsWeeklyRows = csvParse(channelsWeeklyCsv);
+
+    // Normalize to schema: week, source, metric, value
+    function toRecords(rows, source, metric, valueKey) {
+      return rows.map(r => ({
+        week: r.week,
+        source,
+        metric,
+        value: Number(r[valueKey] || 0)
+      }));
+    }
+
+    const brandUnion = [
+      ...toRecords(blogWeeklyRows, 'blog', 'blog_pageviews', 'blog_pageviews'),
+      ...toRecords(channelsWeeklyRows, 'buffer_accounts', 'total_reach', 'total_reach'),
+      ...toRecords(bufferTeamPostsRowsParsed, 'buffer_team', 'total_reach', 'total_reach')
+    ];
+
+    const csvBrandUnion = csvFormat(brandUnion);
+    fs.writeFileSync(`${targetDir}/brand_weekly_reach.csv`, csvBrandUnion);
+    console.log(`Brand weekly reach union complete, saved ${brandUnion.length} rows`);
+
     // Update the lock file
     updateLockFile();
     

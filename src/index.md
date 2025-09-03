@@ -24,6 +24,12 @@ Welcome to the Buffer Metrics Dashboard. This site includes transparent dashboar
     <p>Monthly summary of key marketing metrics including signups and first-time sessions.</p>
     <a href="/monthly-marketing-report" class="dashboard-button">View Dashboard</a>
   </div>
+
+  <div class="dashboard-card">
+    <h3>Brand Reach Dashboard</h3>
+    <p>Weekly reach across Blog, Buffer Accounts, and Buffer Team.</p>
+    <a href="/brand-reach-dashboard" class="dashboard-button">View Dashboard</a>
+  </div>
 </div>
 
 ### Data Freshness
