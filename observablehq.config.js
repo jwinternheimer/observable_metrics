@@ -14,7 +14,8 @@ export default {
       pages: [
         {name: "Company Metrics", path: "/company-metrics"},
         {name: "Team of Creators", path: "/marketing-metrics"},
-        {name: "Monthly Marketing Report", path: "/monthly-marketing-report"}
+        {name: "Monthly Marketing Report", path: "/monthly-marketing-report"},
+        {name: "Brand Reach", path: "/brand-reach-dashboard"}
       ]
     }
   ],
