@@ -1,4 +1,4 @@
-import {csvFormat} from "d3-dsv";
+import {csvFormat, csvParse} from "d3-dsv";
 import fs from "fs";
 import path from "path";
 import {runQuery} from "./google-bigquery.js";
@@ -49,6 +49,45 @@ function shouldRunQueries() {
   }
 }
 
+// Load org_teams.csv data
+function loadOrgTeams() {
+  try {
+    const orgTeamsPath = path.join(targetDir, "org_teams.csv");
+    if (!fs.existsSync(orgTeamsPath)) {
+      console.log("org_teams.csv not found, skipping team assignment");
+      return new Map();
+    }
+    
+    const orgTeamsContent = fs.readFileSync(orgTeamsPath, 'utf8');
+    const orgTeamsData = csvParse(orgTeamsContent);
+    
+    // Create a map for quick lookup: organization_id -> team
+    const orgTeamsMap = new Map();
+    orgTeamsData.forEach(row => {
+      if (row.organization_id && row.team) {
+        orgTeamsMap.set(row.organization_id, row.team);
+      }
+    });
+    
+    console.log(`Loaded ${orgTeamsMap.size} team assignments from org_teams.csv`);
+    return orgTeamsMap;
+  } catch (error) {
+    console.error("Error loading org_teams.csv:", error);
+    return new Map();
+  }
+}
+
+// Join buffer team data with team assignments
+function joinWithTeamData(data, orgTeamsMap) {
+  return data.map(row => {
+    const team = orgTeamsMap.get(row.organization_id) || 'Unknown';
+    return {
+      ...row,
+      team: team
+    };
+  });
+}
+
 // Update the lock file with current timestamp
 function updateLockFile() {
   const lockData = {
@@ -66,6 +105,9 @@ async function executeQueries() {
 
   const environment = process.env.CI ? "CI" : "local";
   console.log(`Starting query execution in ${environment} environment...`);
+
+  // Load org_teams data for team assignment
+  const orgTeamsMap = loadOrgTeams();
 
   try {
     // Query 1: Weekly Signups
@@ -303,9 +345,12 @@ async function executeQueries() {
       return row;
     });
 
-    const csvBufferTeamMonthlyEngagement = csvFormat(formattedBufferTeamMonthlyEngagementRows);
+    // Join with team data from org_teams.csv
+    const bufferTeamMonthlyEngagementWithTeams = joinWithTeamData(formattedBufferTeamMonthlyEngagementRows, orgTeamsMap);
+
+    const csvBufferTeamMonthlyEngagement = csvFormat(bufferTeamMonthlyEngagementWithTeams);
     fs.writeFileSync(`${targetDir}/buffer_team_monthly_engagement.csv`, csvBufferTeamMonthlyEngagement);
-    console.log(`Buffer team monthly engagement query complete, saved ${bufferTeamMonthlyEngagementRows.length} rows`);
+    console.log(`Buffer team monthly engagement query complete, saved ${bufferTeamMonthlyEngagementRows.length} rows with team assignments`);
     
     // Query 9: Monthly Blog Pageviews
     console.log("Running monthly blog pageviews query...");

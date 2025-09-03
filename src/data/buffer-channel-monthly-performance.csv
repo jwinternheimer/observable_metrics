@@ -1,8 +1,8 @@
 service,name,avatar,posts,likes,reposts,comments_and_replies,reach,impressions,views
-bluesky,buffer.com,https://cdn.bsky.app/img/avatar/plain/did:plc:knoepjiqknech5vqiht4bqu6/bafkreiahmauza6pxtr6s2qplw3h6xtzsn3qii5oyslv3xizj6ixi3bqcte@jpeg,21,247,18,40,0,0,0
+instagram,buffer,https://buffer-channel-avatars-bucket.s3.amazonaws.com/602bbb466de888249b11abba_1752087229719,27,1330,0,153,38426,0,79520
 linkedin,bufferapp,https://buffer-channel-avatars-bucket.s3.amazonaws.com/5c93a743dcfa5a327d653ef9_1754299494777,25,937,0,168,63588,0,16066
-facebook,Buffer,https://buffer-channel-avatars-bucket.s3.amazonaws.com/605e1ee359f92514a301a994_1753364202918,1,4,0,1,0,908,0
+tiktok,bufferapp,https://buffer-channel-avatars-bucket.s3.amazonaws.com/62b312de18f2541a8a4c7f83_1742812968561,6,2266,0,45,51380,0,61362
+bluesky,buffer.com,https://cdn.bsky.app/img/avatar/plain/did:plc:knoepjiqknech5vqiht4bqu6/bafkreiahmauza6pxtr6s2qplw3h6xtzsn3qii5oyslv3xizj6ixi3bqcte@jpeg,21,247,18,40,0,0,0
+threads,buffer,https://buffer-channel-avatars-bucket.s3.amazonaws.com/6679782f7839e9e8790483ee_1750379454149,68,616,35,106,0,0,34614
+facebook,Buffer,https://buffer-channel-avatars-bucket.s3.amazonaws.com/605e1ee359f92514a301a994_1753364202918,1,4,0,1,0,922,0
 twitter,buffer,https://pbs.twimg.com/profile_images/1418307222313054211/EF-ka8yB_normal.jpg,1,5,3,5,2910,0,0
-instagram,buffer,https://buffer-channel-avatars-bucket.s3.amazonaws.com/602bbb466de888249b11abba_1752087229719,27,1326,0,152,38092,0,78363
-tiktok,bufferapp,https://buffer-channel-avatars-bucket.s3.amazonaws.com/62b312de18f2541a8a4c7f83_1742812968561,6,2165,0,43,49773,0,58889
-threads,buffer,https://buffer-channel-avatars-bucket.s3.amazonaws.com/6679782f7839e9e8790483ee_1750379454149,68,616,35,106,0,0,34410
