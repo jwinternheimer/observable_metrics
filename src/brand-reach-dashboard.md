@@ -33,15 +33,70 @@ const brandWeeklyReach = brandWeeklyReachRaw.map(d => ({
 const startOf2025 = new Date('2025-01-01T00:00:00Z');
 const brandWeeklyReachFiltered = brandWeeklyReach.filter(d => d.week >= startOf2025);
 
-const colorDomain = ["blog", "buffer_accounts", "buffer_team"];
-const colorRange = ["#1f77b4", "#ff7f0e", "#2ca02c"];
+// Load Press/PR mentions weekly reach and merge as a new source "PR"
+const pressRaw = await FileAttachment("data/press_reach.csv").csv({typed: false});
+function parsePressDate(s) {
+  if (!s) return new Date(NaN);
+  const m = String(s).trim();
+  // Exclude month summary rows like "January", "February", etc.
+  if (/^[A-Za-z]+$/.test(m)) return new Date(NaN);
+  // Expect formats like 5-Feb-2025, 11-Feb-2025, 3-Apri-2025
+  const match = m.match(/^(\d{1,2})-([A-Za-z]{3,9})-(\d{4})$/);
+  if (!match) return new Date(NaN);
+  const day = parseInt(match[1], 10);
+  const monStr = match[2].toLowerCase();
+  let year = parseInt(match[3], 10);
+  const monthIndexLookup = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
+  const key = monStr.length >= 3 ? monStr.slice(0, 3) : monStr;
+  const monthIndex = monthIndexLookup[key] ?? (monStr === 'apri' ? 3 : undefined);
+  if (monthIndex == null) return new Date(NaN);
+  // Normalize any non-2025 dates to 2025 per dataset constraints
+  if (year !== 2025) year = 2025;
+  return new Date(Date.UTC(year, monthIndex, day));
+}
+function toSundayUTC(date) {
+  if (!(date instanceof Date) || Number.isNaN(date)) return new Date(NaN);
+  const dow = date.getUTCDay();
+  const sunday = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() - dow));
+  return sunday;
+}
+function getColumnValue(row, wantedNameLowerTrim) {
+  const keys = Object.keys(row);
+  for (const k of keys) {
+    const norm = String(k).toLowerCase().trim();
+    if (norm === wantedNameLowerTrim) return row[k];
+  }
+  return undefined;
+}
+function parsePressDateFromRow(row) {
+  const keys = Object.keys(row);
+  const firstKey = keys[0];
+  return parsePressDate(row[firstKey]);
+}
+const pressWeekly = pressRaw
+  .map(r => {
+    const parsed = parsePressDateFromRow(r);
+    const week = toSundayUTC(parsed);
+    const reachCandidate = getColumnValue(r, 'reach');
+    const reachRaw = (reachCandidate ?? "").toString().replace(/,/g, '').trim();
+    const hasNumber = /^(?:\d+)(?:\.\d+)?$/.test(reachRaw);
+    const value = hasNumber ? +reachRaw : NaN;
+    return { week, source: "PR", metric: "press_reach", value };
+  })
+  .filter(d => !Number.isNaN(d.week) && d.week >= startOf2025 && Number.isFinite(d.value));
+
+// Merge PR with existing sources
+const brandWeeklyReachAll = brandWeeklyReachFiltered.concat(pressWeekly).sort((a,b) => a.week - b.week);
+
+const colorDomain = ["blog", "buffer_accounts", "buffer_team", "PR"];
+const colorRange = ["#1f77b4", "#ff7f0e", "#2ca02c", "#9467bd"];
 ```
 
 ```js
-// Compute weekly totals across sources
+// Compute weekly totals across sources (including PR)
 const brandWeeklyTotals = (() => {
   const totalsMap = new Map();
-  for (const d of brandWeeklyReachFiltered) {
+  for (const d of brandWeeklyReachAll) {
     const ts = d.week.getTime();
     totalsMap.set(ts, (totalsMap.get(ts) || 0) + (d.value || 0));
   }
@@ -91,7 +146,7 @@ function renderBrandReachPlot() {
   const marks = [];
   if (type === 'line') {
     marks.push(
-      Plot.line(brandWeeklyReachFiltered, {
+      Plot.line(brandWeeklyReachAll, {
         x: 'week',
         y: 'value',
         stroke: 'source',
@@ -99,7 +154,7 @@ function renderBrandReachPlot() {
         curve: 'natural',
         z: 'source'
       }),
-      Plot.dot(brandWeeklyReachFiltered, {
+      Plot.dot(brandWeeklyReachAll, {
         x: 'week',
         y: 'value',
         fill: 'source',
@@ -110,7 +165,7 @@ function renderBrandReachPlot() {
     );
   } else {
     marks.push(
-      Plot.areaY(brandWeeklyReachFiltered, Plot.stackY({
+      Plot.areaY(brandWeeklyReachAll, Plot.stackY({
         x: 'week',
         y: 'value',
         fill: 'source',
@@ -153,21 +208,22 @@ renderBrandReachPlot();
 ```js
 // Simple weekly summary table (last 12 weeks)
 function buildWeeklyPivot(rows) {
-  const weekKey = d => new Date(d.week.getFullYear(), d.week.getMonth(), d.week.getDate()).getTime();
+  const weekKey = d => Date.UTC(d.week.getUTCFullYear(), d.week.getUTCMonth(), d.week.getUTCDate());
   const map = new Map();
   for (const d of rows) {
     const k = weekKey(d);
-    if (!map.has(k)) map.set(k, { week: new Date(d.week), blog: 0, buffer_accounts: 0, buffer_team: 0, total: 0 });
+    if (!map.has(k)) map.set(k, { week: new Date(d.week), blog: 0, buffer_accounts: 0, buffer_team: 0, PR: 0, total: 0 });
     const row = map.get(k);
     if (d.source === 'blog') row.blog += d.value || 0;
     else if (d.source === 'buffer_accounts') row.buffer_accounts += d.value || 0;
     else if (d.source === 'buffer_team') row.buffer_team += d.value || 0;
+    else if (d.source === 'PR') row.PR += d.value || 0;
     row.total += d.value || 0;
   }
   return Array.from(map.values()).sort((a,b) => a.week - b.week);
 }
 
-const weeklyPivot = buildWeeklyPivot(brandWeeklyReachFiltered);
+const weeklyPivot = buildWeeklyPivot(brandWeeklyReachAll);
 const last12 = weeklyPivot.slice(Math.max(0, weeklyPivot.length - 12));
 
 function formatNum(n) { return (n || 0).toLocaleString(); }
@@ -179,6 +235,7 @@ const table = html`<table>
       <th style="text-align:right;">Blog</th>
       <th style="text-align:right;">Buffer Accounts</th>
       <th style="text-align:right;">Buffer Team</th>
+      <th style="text-align:right;">PR</th>
       <th style="text-align:right;">Total</th>
     </tr>
   </thead>
@@ -188,6 +245,7 @@ const table = html`<table>
       <td style="text-align:right;">${formatNum(r.blog)}</td>
       <td style="text-align:right;">${formatNum(r.buffer_accounts)}</td>
       <td style="text-align:right;">${formatNum(r.buffer_team)}</td>
+      <td style="text-align:right;">${formatNum(r.PR)}</td>
       <td style="text-align:right; font-weight:600;">${formatNum(r.total)}</td>
     </tr>`) }
   </tbody>
