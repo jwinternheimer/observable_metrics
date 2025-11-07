@@ -22,7 +22,7 @@ export default {
 
   // Content to add to the head of the page, e.g. for a favicon:
   head: `
-    <link rel="icon" href="observable.png" type="image/png" sizes="32x32">
+    <link rel="icon" href="logo.png" type="image/png" sizes="32x32">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
       body {
