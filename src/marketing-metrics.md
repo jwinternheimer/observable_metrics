@@ -445,6 +445,39 @@ function computeEngagementByTeamForMonth(monthTs) {
   }));
 }
 
+// Team Engagement by Team Month Selector
+const teamMonthSelect = document.createElement('select');
+teamMonthSelect.setAttribute('aria-label', 'Month');
+teamMonthSelect.style.margin = '8px 0 16px 0';
+uniqueMonths.forEach(m => {
+  const opt = document.createElement('option');
+  opt.value = String(m.getTime());
+  opt.textContent = monthLabel(m);
+  if (m.getTime() === initialSelectedMonthTs) opt.selected = true;
+  teamMonthSelect.appendChild(opt);
+});
+
+const teamHeaderContainer = document.createElement('div');
+teamHeaderContainer.className = 'section-header';
+
+function updateTeamHeader() {
+    const selectedTs = Number(teamMonthSelect.value);
+    const date = new Date(selectedTs);
+    const monthStr = monthNames[date.getMonth()];
+    const yearStr = date.getFullYear();
+    teamHeaderContainer.innerHTML = `
+        <h2>Team Engagement by Team - ${monthStr} ${yearStr}</h2>
+        <p>Aggregated from Buffer Team Monthly Engagement</p>
+        <label style="display:block; font-weight:600; margin-bottom:4px;">Select Month</label>
+    `;
+    teamHeaderContainer.appendChild(teamMonthSelect);
+}
+
+teamMonthSelect.addEventListener('change', updateTeamHeader);
+updateTeamHeader(); // Initial render
+
+display(teamHeaderContainer);
+
 function bufferTeamEngagementByTeamTable() {
   // Sort state
   let sortColumn = 'likes';
@@ -456,7 +489,7 @@ function bufferTeamEngagementByTeamTable() {
   container.className = 'engagement-table';
 
   function render() {
-    const selectedMonthTs = Number(monthSelect.value);
+    const selectedMonthTs = Number(teamMonthSelect.value);
     const engagementByTeam = computeEngagementByTeamForMonth(selectedMonthTs);
     const sortedData = sortData(engagementByTeam, sortColumn, sortDirection, 'team');
     const totals = engagementByTeam.reduce((acc, d) => ({
@@ -569,17 +602,14 @@ function bufferTeamEngagementByTeamTable() {
   }
 
   render();
-  monthSelect.addEventListener('change', () => {
+  teamMonthSelect.addEventListener('change', () => {
     render();
   });
   return container;
 }
 ```
 
-<div class="section-header">
-  <h2>Team Engagement by Team - ${currentMonth} ${currentYear}</h2>
-  <p>Aggregated from Buffer Team Monthly Engagement</p>
-</div>
+
 
 ```js
 display(bufferTeamEngagementByTeamTable());
