@@ -21,6 +21,9 @@ const lastRunDate = new Date(lastQueryTimestamp.lastRun).toLocaleString('en-US',
 </div>
 
 ```js
+// Import utilities
+import { lineChart, buildUniqueMonths, monthLabel, sortData } from "./components/chart-utils.js";
+
 // Load data from CSV files - using consolidated query data
 const bufferTeamPosts = FileAttachment("data/buffer_team_posts.csv").csv({typed: true});
 const bufferTeamMonthlyEngagementRaw = await FileAttachment("data/buffer_team_monthly_engagement.csv").csv();
@@ -44,121 +47,53 @@ const bufferTeamWeeklyMedianPosts = FileAttachment("data/buffer_team_weekly_medi
 ```js
 // Create a function for the weekly active team members plot
 function activeTeamMembersPlot(width) {
-  return Plot.plot({
+  return lineChart({
+    data: bufferTeamWeeklyActiveMembers,
+    xField: "week",
+    yField: "active_team_members",
     title: "Active Team Members",
-    y: { grid: true, label: "Number of Active Members" },
-    x: { label: "Week", tickRotate: 45 },
-    marks: [
-      Plot.line(bufferTeamWeeklyActiveMembers, {
-        x: "week",
-        y: "active_team_members",
-        stroke: "#2ECC71",
-        strokeWidth: 2,
-        curve: "natural"
-      }),
-      Plot.dot(bufferTeamWeeklyActiveMembers, {
-        x: "week",
-        y: "active_team_members",
-        fill: "#2ECC71",
-        r: 3,
-        tip: true
-      }),
-      Plot.ruleY([0])
-    ],
-    width: width || 900,
-    height: 400,
-    marginBottom: 70,
-    marginLeft: 60
+    yLabel: "Number of Active Members",
+    stroke: "#2ECC71",
+    width
   });
 }
 
 // Create a function for the Buffer team posts plot
 function totalTeamPostsPlot(width) {
-  return Plot.plot({
+  return lineChart({
+    data: bufferTeamPosts,
+    xField: "week",
+    yField: "posts",
     title: "Total Team Posts",
-    y: { grid: true, label: "Number of Posts" },
-    x: { label: "Week", tickRotate: 45 },
-    marks: [
-      Plot.line(bufferTeamPosts, {
-        x: "week",
-        y: "posts",
-        stroke: "#2C7BB6",
-        strokeWidth: 2,
-        curve: "natural"
-      }),
-      Plot.dot(bufferTeamPosts, {
-        x: "week",
-        y: "posts",
-        fill: "#2C7BB6",
-        r: 3,
-        tip: true
-      }),
-      Plot.ruleY([0])
-    ],
-    width: width || 900,
-    height: 400,
-    marginBottom: 70,
-    marginLeft: 60
+    yLabel: "Number of Posts",
+    stroke: "#2C7BB6",
+    width
   });
 }
 
 // Create a function for the median posts per team member plot
 function medianPostsPerMemberPlot(width) {
-  return Plot.plot({
+  return lineChart({
+    data: bufferTeamWeeklyMedianPosts,
+    xField: "week",
+    yField: "median_posts_per_member",
     title: "Median Posts Per Team Member",
-    y: { grid: true, label: "Median Posts per Member" },
-    x: { label: "Week", tickRotate: 45 },
-    marks: [
-      Plot.line(bufferTeamWeeklyMedianPosts, {
-        x: "week",
-        y: "median_posts_per_member",
-        stroke: "#9B59B6",
-        strokeWidth: 2,
-        curve: "natural"
-      }),
-      Plot.dot(bufferTeamWeeklyMedianPosts, {
-        x: "week",
-        y: "median_posts_per_member",
-        fill: "#9B59B6",
-        r: 3,
-        tip: true
-      }),
-      Plot.ruleY([0])
-    ],
-    width: width || 900,
-    height: 400,
-    marginBottom: 70,
-    marginLeft: 60
+    yLabel: "Median Posts per Member",
+    stroke: "#9B59B6",
+    width
   });
 }
 
 // Create a function for the Buffer team reach plot
 function totalTeamReachPlot(width) {
-  return Plot.plot({
+  return lineChart({
+    data: bufferTeamPosts,
+    xField: "week",
+    yField: "total_reach",
     title: "Total Team Reach",
-    y: { grid: true, label: "Total Reach" },
-    x: { label: "Week", tickRotate: 45 },
-    marks: [
-      Plot.line(bufferTeamPosts, {
-        x: "week",
-        y: "total_reach",
-        stroke: "#D7301F",
-        strokeWidth: 2,
-        curve: "natural"
-      }),
-      Plot.dot(bufferTeamPosts, {
-        x: "week",
-        y: "total_reach",
-        fill: "#D7301F",
-        r: 3,
-        tip: true
-      }),
-      Plot.ruleY([0])
-    ],
-    width: width || 900,
-    height: 400,
-    marginBottom: 70,
-    marginLeft: 60
+    yLabel: "Total Reach",
+    stroke: "#D7301F",
+    width
   });
 }
 ```
@@ -187,29 +122,7 @@ const currentYear = currentDate.getFullYear();
 ```
 
 ```js
-// Helpers
-function monthLabel(dt) {
-  return dt.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
-}
-function buildUniqueMonths(rows) {
-  return Array.from(new Set(rows.map(d => d.month.getTime())))
-    .sort((a, b) => b - a)
-    .map(ts => new Date(ts));
-}
-function sortData(data, column, direction, textKey) {
-  return [...data].sort((a, b) => {
-    let aVal, bVal;
-    if (column === textKey) {
-      aVal = (a[textKey] || '').toLowerCase();
-      bVal = (b[textKey] || '').toLowerCase();
-    } else {
-      aVal = a[column] || 0;
-      bVal = b[column] || 0;
-    }
-    if (direction === 'asc') return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
-    return aVal < bVal ? 1 : aVal > bVal ? -1 : 0;
-  });
-}
+// Helper for sort icons
 function getSortIconFactory(currentColumnRef, currentDirectionRef) {
   return (column) => currentColumnRef.value !== column ? '↕️' : (currentDirectionRef.value === 'asc' ? '↑' : '↓');
 }

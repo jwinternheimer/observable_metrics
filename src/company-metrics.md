@@ -23,8 +23,8 @@ const lastRunDate = new Date(lastQueryTimestamp.lastRun).toLocaleString('en-US',
 </div>
 
 ```js
-// Import the xmr component
-import {xmrChart} from "./components/xmr.js";
+// Import components
+import { xmrChart } from "./components/xmr.js";
 
 // Load data from CSV files
 const weeklySignups = FileAttachment("data/company_weekly_signups.csv").csv({typed: true});
@@ -82,17 +82,9 @@ function weeklySubscriptionStartsPlot(width) {
 function weeklyMRRMetricsPlot(width) {
   return Plot.plot({
     title: "Weekly MRR Movement Events (Last 52 Weeks)",
-    y: {
-      grid: true,
-      label: "Number of Customers"
-    },
-    x: {
-      label: "Week",
-      tickRotate: 45
-    },
-    color: {
-      legend: true
-    },
+    y: { grid: true, label: "Number of Customers" },
+    x: { label: "Week", tickRotate: 45 },
+    color: { legend: true },
     marks: [
       Plot.line(chartmogulMrrEvents, {
         x: "week",
@@ -102,7 +94,7 @@ function weeklyMRRMetricsPlot(width) {
         curve: "natural"
       }),
       Plot.dot(chartmogulMrrEvents, {
-        x: "week", 
+        x: "week",
         y: "customers",
         stroke: "movement_type",
         fill: "movement_type",
