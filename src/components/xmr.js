@@ -1,6 +1,7 @@
 import * as Plot from "npm:@observablehq/plot";
 import * as d3 from "npm:d3@7";
 import { resize } from "npm:@observablehq/stdlib";
+import { html } from "npm:htl";
 
 const NPL_SCALING = 2.66;
 const URL_SCALING = 3.268;
@@ -84,22 +85,13 @@ function detectSeasonality(data, period = 12) {
 // Enhanced detection rules based on xmrit documentation
 function detectSpecialCauses(data, limits, trend = null) {
   const { avgX, UNPL, LNPL } = limits;
-  
+
   return data.map((point, index) => {
     const signals = [];
-    
-    // Calculate trend-adjusted limits for this specific point if trend exists
-    let currentUCL, currentLCL, currentCL;
-    if (trend && trend.isSignificant) {
-      currentCL = trend.slope * index + trend.intercept;
-      currentUCL = currentCL + (UNPL - avgX);
-      currentLCL = currentCL + (LNPL - avgX);
-    } else {
-      currentCL = avgX;
-      currentUCL = UNPL;
-      currentLCL = LNPL;
-    }
-    
+
+    // Calculate trend-adjusted limits for this specific point
+    const { CL: currentCL, UCL: currentUCL, LCL: currentLCL } = getTrendAdjustedLimit(index, trend, avgX, UNPL, LNPL);
+
     const quarterUpper = currentCL + (currentUCL - currentCL) / 2;
     const quarterLower = currentCL - (currentCL - currentLCL) / 2;
     
@@ -113,21 +105,12 @@ function detectSpecialCauses(data, limits, trend = null) {
       const last4 = data.slice(index - 3, index + 1);
       const nearLimitCount = last4.filter((p, i) => {
         const idx = index - 3 + i;
-        let checkUCL, checkLCL, checkCL;
-        if (trend && trend.isSignificant) {
-          checkCL = trend.slope * idx + trend.intercept;
-          checkUCL = checkCL + (UNPL - avgX);
-          checkLCL = checkCL + (LNPL - avgX);
-        } else {
-          checkCL = avgX;
-          checkUCL = UNPL;
-          checkLCL = LNPL;
-        }
-        
+        const { CL: checkCL, UCL: checkUCL, LCL: checkLCL } = getTrendAdjustedLimit(idx, trend, avgX, UNPL, LNPL);
+
         return Math.abs(p.value - checkUCL) < Math.abs(p.value - checkCL) ||
                Math.abs(p.value - checkLCL) < Math.abs(p.value - checkCL);
       }).length;
-      
+
       if (nearLimitCount >= 3) {
         signals.push('quartile');
       }
@@ -138,17 +121,15 @@ function detectSpecialCauses(data, limits, trend = null) {
       const last8 = data.slice(index - 7, index + 1);
       const allAbove = last8.every((p, i) => {
         const idx = index - 7 + i;
-        const checkCL = trend && trend.isSignificant ? 
-          trend.slope * idx + trend.intercept : avgX;
+        const { CL: checkCL } = getTrendAdjustedLimit(idx, trend, avgX, UNPL, LNPL);
         return p.value > checkCL;
       });
       const allBelow = last8.every((p, i) => {
         const idx = index - 7 + i;
-        const checkCL = trend && trend.isSignificant ? 
-          trend.slope * idx + trend.intercept : avgX;
+        const { CL: checkCL } = getTrendAdjustedLimit(idx, trend, avgX, UNPL, LNPL);
         return p.value < checkCL;
       });
-      
+
       if (allAbove || allBelow) {
         signals.push('run8');
       }
@@ -160,6 +141,33 @@ function detectSpecialCauses(data, limits, trend = null) {
       hasSignal: signals.length > 0
     };
   });
+}
+
+// Helper to get point color based on signals
+function getPointColor(signals) {
+  if (signals.includes('limit')) return "red";
+  if (signals.includes('quartile')) return "orange";
+  if (signals.includes('run8')) return "yellow";
+  return "steelblue";
+}
+
+// Helper to get signal description
+function getSignalDescription(signals) {
+  if (!signals || signals.length === 0) return "Normal variation";
+  return `Special cause: ${signals.join(', ')}`;
+}
+
+// Calculate trend-adjusted control limit for a specific index
+function getTrendAdjustedLimit(index, trend, avgX, UNPL, LNPL) {
+  if (trend && trend.isSignificant) {
+    const currentCL = trend.slope * index + trend.intercept;
+    return {
+      CL: currentCL,
+      UCL: currentCL + (UNPL - avgX),
+      LCL: currentCL + (LNPL - avgX)
+    };
+  }
+  return { CL: avgX, UCL: UNPL, LCL: LNPL };
 }
 
 export function xmrChart({
@@ -176,19 +184,20 @@ export function xmrChart({
   seasonalPeriod = 12
 }) {
   return resize((width) => {
-    const data = metrics.map(d => ({
+    const data = metrics.map((d, idx) => ({
       date: d[dateField],
-      value: yTransform(typeof yField === "function" ? yField(d) : d[yField])
+      value: yTransform(typeof yField === "function" ? yField(d) : d[yField]),
+      index: idx  // Store index for efficient lookup
     })).filter(d => d.value != null && !isNaN(d.value));
-    
+
     const movements = getMovements(data);
     const { avgX, avgMovement, UNPL, LNPL, URL } = calculateLimits(data, movements);
-    
-         // Detect trends first
-     const trend = showTrend ? detectTrend(data) : null;
-     
-     // Detect special causes with enhanced rules (trend-adjusted)
-     const dataWithSignals = detectSpecialCauses(data, { avgX, UNPL, LNPL }, trend);
+
+    // Detect trends first
+    const trend = showTrend ? detectTrend(data) : null;
+
+    // Detect special causes with enhanced rules (trend-adjusted)
+    const dataWithSignals = detectSpecialCauses(data, { avgX, UNPL, LNPL }, trend);
     
     // Detect seasonality
     const seasonality = showSeasonality ? detectSeasonality(data, seasonalPeriod) : null;
@@ -284,24 +293,16 @@ export function xmrChart({
        Plot.dot(dataWithSignals, {
          x: "date",
          y: "value",
-         fill: d => {
-           if (d.signals.includes('limit')) return "red";
-           if (d.signals.includes('quartile')) return "orange";
-           if (d.signals.includes('run8')) return "yellow";
-           return "steelblue";
-         },
+         fill: d => getPointColor(d.signals),
          stroke: d => d.hasSignal ? "black" : "none",
          strokeWidth: d => d.hasSignal ? 1 : 0,
          r: 3,
+         channels: { signal: d => getSignalDescription(d.signals) },
          tip: {
            format: {
              x: d => new Date(d).toLocaleDateString(),
              y: d => d.toFixed(2),
-             fill: d => {
-               const point = dataWithSignals.find(p => p.value === d);
-               if (!point || !point.hasSignal) return "Normal variation";
-               return `Special cause: ${point.signals.join(', ')}`;
-             }
+             signal: d => d
            }
          }
        }),
@@ -423,12 +424,7 @@ export function xmrChart({
       ]
     });
     
-    const container = document.createElement("div");
-    
-    // Add legend/explanation above the chart
-    const legend = document.createElement("div");
-    legend.className = "xmr-legend";
-    legend.style.cssText = `
+    const legend = html`<div class="xmr-legend" style="
       margin: 10px 0;
       padding: 12px 16px;
       background-color: #f8f9fa;
@@ -437,12 +433,8 @@ export function xmrChart({
       border-left: 4px solid #007bff;
       font-size: 13px;
       line-height: 1.5;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      display: block;
-      width: 100%;
-      box-sizing: border-box;
-    `;
-    legend.innerHTML = `
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    ">
       <div style="margin-bottom: 6px;"><strong>XmR Chart Signal Detection:</strong></div>
       <div style="display: flex; flex-wrap: wrap; gap: 16px;">
         <span><span style="color: steelblue; font-weight: bold; font-size: 16px;">●</span> Normal variation</span>
@@ -450,39 +442,37 @@ export function xmrChart({
         <span><span style="color: #fd7e14; font-weight: bold; font-size: 16px;">●</span> Quartile rule (3/4 near limits)</span>
         <span><span style="color: #ffc107; font-weight: bold; font-size: 16px;">●</span> Runs of eight (systematic shift)</span>
       </div>
-    `;
-    
-    container.appendChild(legend);
-    container.appendChild(xPlot);
-    container.appendChild(mrPlot);
-    
-    // Add seasonality chart if requested
-    if (showSeasonality && seasonality) {
-      const seasonalPlot = Plot.plot({
-        title: `Seasonal Pattern (Period: ${seasonalPeriod})`,
-        width,
-        height: 150,
-        x: { label: "Period" },
-        y: { label: "Average Value", grid: true },
-        marks: [
-          Plot.line(seasonality, {
-            x: "period",
-            y: "average",
-            stroke: "green",
-            strokeWidth: 2
-          }),
-          Plot.dot(seasonality, {
-            x: "period",
-            y: "average",
-            fill: "green",
-            r: 3,
-            tip: true
-          })
-        ]
-      });
-      container.appendChild(seasonalPlot);
-    }
-    
-    return container;
+    </div>`;
+
+    // Create seasonality chart if requested
+    const seasonalPlot = (showSeasonality && seasonality) ? Plot.plot({
+      title: `Seasonal Pattern (Period: ${seasonalPeriod})`,
+      width,
+      height: 150,
+      x: { label: "Period" },
+      y: { label: "Average Value", grid: true },
+      marks: [
+        Plot.line(seasonality, {
+          x: "period",
+          y: "average",
+          stroke: "green",
+          strokeWidth: 2
+        }),
+        Plot.dot(seasonality, {
+          x: "period",
+          y: "average",
+          fill: "green",
+          r: 3,
+          tip: true
+        })
+      ]
+    }) : null;
+
+    return html`<div>
+      ${legend}
+      ${xPlot}
+      ${mrPlot}
+      ${seasonalPlot}
+    </div>`;
   });
 }
