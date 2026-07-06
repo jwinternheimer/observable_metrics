@@ -31,7 +31,35 @@ export default {
       * {
         font-family: "JetBrains Mono", monospace !important;
       }
+      .sunset-banner {
+        background: #fef3c7;
+        border-bottom: 1px solid #f59e0b;
+        color: #78350f;
+        padding: 10px 16px;
+        text-align: center;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+      .sunset-banner strong {
+        font-weight: 700;
+      }
+      .sunset-banner a {
+        color: #78350f;
+        font-weight: 700;
+        text-decoration: underline;
+      }
     </style>
+  `,
+
+  // Sunset banner shown at the top of every page.
+  header: `
+    <div class="sunset-banner">
+      <strong>⚠️ This dashboard will be sunsetted soon.</strong>
+      Please view company metrics
+      <a href="https://app.hex.tech/019eb072-e729-70e5-ab25-7f0053b6a54f/app/Company-Metrics-033aXEHQ2A6YiFPWtibDbb/latest" target="_blank" rel="noopener">here</a>
+      and the Team of Creators dashboard
+      <a href="https://app.hex.tech/019eb072-e729-70e5-ab25-7f0053b6a54f/app/Team-of-Creators-Dashboard-033ZylKudBl3W7Kjgoc2Db/latest" target="_blank" rel="noopener">here</a>.
+    </div>
   `,
 
   // The path to the source root.

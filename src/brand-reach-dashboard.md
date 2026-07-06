@@ -103,6 +103,78 @@ const brandWeeklyTotals = (() => {
   return Array.from(totalsMap, ([ts, total]) => ({ week: new Date(Number(ts)), total })).sort((a,b) => a.week - b.week);
 })();
 
+// LOESS smoothing function
+function loess(data, bandwidth = 0.2) {
+  if (!data || data.length < 3) return data;
+
+  const n = data.length;
+  const smoothed = [];
+
+  for (let i = 0; i < n; i++) {
+    const x0 = data[i].week.getTime();
+
+    // Calculate distances to all points
+    const distances = data.map((d, j) => ({
+      index: j,
+      distance: Math.abs(d.week.getTime() - x0),
+      value: d.total
+    }));
+
+    // Sort by distance and take nearest neighbors based on bandwidth
+    const k = Math.max(3, Math.floor(bandwidth * n));
+    distances.sort((a, b) => a.distance - b.distance);
+    const neighbors = distances.slice(0, k);
+
+    // Find max distance for weighting
+    const maxDist = neighbors[neighbors.length - 1].distance;
+
+    // Calculate weighted regression (locally weighted linear fit)
+    let sumW = 0;
+    let sumWX = 0;
+    let sumWY = 0;
+    let sumWXX = 0;
+    let sumWXY = 0;
+
+    for (const neighbor of neighbors) {
+      // Tricube weight function
+      const u = neighbor.distance / (maxDist + 1e-10);
+      const w = Math.pow(1 - Math.pow(u, 3), 3);
+
+      const x = neighbor.index;
+      const y = neighbor.value;
+
+      sumW += w;
+      sumWX += w * x;
+      sumWY += w * y;
+      sumWXX += w * x * x;
+      sumWXY += w * x * y;
+    }
+
+    // Solve for local linear regression coefficients
+    const denom = sumW * sumWXX - sumWX * sumWX;
+    let yHat;
+
+    if (Math.abs(denom) > 1e-10) {
+      const b = (sumW * sumWXY - sumWX * sumWY) / denom;
+      const a = (sumWY - b * sumWX) / sumW;
+      yHat = a + b * i;
+    } else {
+      // Fallback to weighted mean if denominator is too small
+      yHat = sumWY / sumW;
+    }
+
+    smoothed.push({
+      week: data[i].week,
+      total: yHat
+    });
+  }
+
+  return smoothed;
+}
+
+// Apply LOESS smoothing to totals
+const brandWeeklyTotalsSmoothed = loess(brandWeeklyTotals, 0.2);
+
 // Controls
 const controlsContainer = document.createElement('div');
 controlsContainer.style.margin = '0 0 12px 0';
@@ -178,7 +250,8 @@ function renderBrandReachPlot() {
   if (showTotal) {
     marks.push(
       Plot.line(brandWeeklyTotals, { x: 'week', y: 'total', stroke: '#111', strokeWidth: 1.5 }),
-      Plot.dot(brandWeeklyTotals, { x: 'week', y: 'total', fill: '#111', r: 2, tip: true })
+      Plot.dot(brandWeeklyTotals, { x: 'week', y: 'total', fill: '#111', r: 2, tip: true }),
+      Plot.line(brandWeeklyTotalsSmoothed, { x: 'week', y: 'total', stroke: '#111', strokeWidth: 2, strokeDasharray: '4,4', tip: true })
     );
   }
 

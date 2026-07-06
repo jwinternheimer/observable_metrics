@@ -69,6 +69,48 @@ test.describe('Dashboard Visual Regression Tests', () => {
     await page.screenshot({ path: 'tests/screenshots/brand-reach.png', fullPage: true });
   });
 
+  test('Brand Reach Dashboard shows smoothed line', async ({ page }) => {
+    await page.goto('/brand-reach-dashboard');
+    await expect(page.locator('h1')).toContainText('Brand Reach');
+
+    // Wait for charts to render
+    await page.waitForSelector('svg', { timeout: 10000 });
+    await page.waitForTimeout(3000); // Give more time for rendering
+
+    // Find the SVG containing the plot - it's typically in a div.card
+    const plotCard = page.locator('div.card').nth(1); // Second card contains the plot
+    const svg = plotCard.locator('svg').first();
+
+    // Count total paths in the SVG
+    const pathCount = await svg.locator('path').count();
+    console.log('Total paths in SVG:', pathCount);
+
+    // Get all path elements and check their attributes
+    const allPaths = await svg.locator('path').all();
+    let foundDashedLine = false;
+    let dasharrayCount = 0;
+
+    for (const path of allPaths) {
+      const dasharray = await path.getAttribute('stroke-dasharray');
+      if (dasharray) {
+        dasharrayCount++;
+        console.log('Found stroke-dasharray:', dasharray);
+        if (dasharray.includes('4')) {
+          foundDashedLine = true;
+        }
+      }
+    }
+
+    console.log('Paths with stroke-dasharray:', dasharrayCount);
+    console.log('Found dashed line with "4":', foundDashedLine);
+
+    // Check if we have the smoothed line rendered
+    expect(foundDashedLine).toBe(true);
+
+    // Take screenshot to verify visually
+    await page.screenshot({ path: 'tests/screenshots/brand-reach-smoothed.png', fullPage: true });
+  });
+
   test('XmR chart interactivity works', async ({ page }) => {
     await page.goto('/company-metrics');
 
